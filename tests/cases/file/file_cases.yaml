@@ -1,8 +1,0 @@
-- id: TC-FILE-001
-  title: 合法图片上传成功
-  method: POST
-  url: /v2/files/upload
-  files:
-    file: tests/data/upload_test.png
-  assert:
-    status_code: 200

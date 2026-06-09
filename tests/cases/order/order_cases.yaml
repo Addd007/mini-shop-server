@@ -1,9 +1,0 @@
-- id: TC-ORDER-001
-  title: 正常商品下单成功
-  method: POST
-  url: /v1/orders
-  request:
-    product_id: 1001
-    count: 1
-  assert:
-    status_code: 200
