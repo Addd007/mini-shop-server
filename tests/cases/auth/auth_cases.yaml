@@ -1,0 +1,57 @@
+- id: TC-AUTH-001
+  method: POST
+  path: /v1/token
+  summary: 管理员账号登录成功
+  headers: {}
+  json:
+    account: admin
+    secret: admin123456
+    type: 100
+  expected:
+    status_code: 200
+
+- id: TC-AUTH-002
+  method: POST
+  path: /v1/token
+  summary: 普通用户 A 登录成功
+  headers: {}
+  json:
+    account: alice
+    secret: alice123456
+    type: 100
+  expected:
+    status_code: 200
+
+- id: TC-AUTH-003
+  method: POST
+  path: /v1/token
+  summary: 普通用户 B 登录成功
+  headers: {}
+  json:
+    account: bob
+    secret: bob123456
+    type: 100
+  expected:
+    status_code: 200
+
+- id: TC-AUTH-004
+  method: POST
+  path: /v1/token
+  summary: 密码错误登录失败
+  headers: {}
+  json:
+    account: bob
+    secret: wrong-password
+    type: 100
+  expected:
+    status_code: 200
+
+- id: TC-AUTH-008
+  method: POST
+  path: /v1/token/verify
+  summary: 伪造 Token 校验失败
+  headers: {}
+  json:
+    token: fake-token
+  expected:
+    status_code: 200

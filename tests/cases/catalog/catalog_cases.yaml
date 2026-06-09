@@ -1,0 +1,37 @@
+- id: TC-PROD-001
+  method: GET
+  path: /v1/product/recent
+  summary: 最近商品查询成功
+  headers: {}
+  params:
+    count: 5
+  expected:
+    status_code: 200
+
+- id: TC-PROD-002
+  method: GET
+  path: /v1/product/1
+  summary: 商品详情查询成功
+  headers: {}
+  expected:
+    status_code: 200
+
+- id: TC-PROD-003
+  method: GET
+  path: /v1/product/list/by_category
+  summary: 按分类查询商品列表成功
+  headers: {}
+  params:
+    category_id: 1
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: TC-PROD-009
+  method: GET
+  path: /v1/category/all
+  summary: 查询所有产品分类
+  headers: {}
+  expected:
+    status_code: 200

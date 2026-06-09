@@ -1,0 +1,27 @@
+- id: TC-FILE-001
+  method: GET
+  path: /cms/file/folder
+  summary: 获取目录树
+  headers: {}
+  expected:
+    status_code: 200
+
+- id: TC-FILE-002
+  method: GET
+  path: /cms/file/list
+  summary: 查询文件列表
+  headers: {}
+  params:
+    parent_id: 0
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: TC-FILE-003
+  method: GET
+  path: /cms/file/types
+  summary: 查询支持的文件类型
+  headers: {}
+  expected:
+    status_code: 200

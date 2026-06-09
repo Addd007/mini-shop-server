@@ -1,5 +1,5 @@
 base_url: "http://127.0.0.1:8080"
 username: "admin"
-password: "123456"
+password: "admin123456"
 timeout: 10
 upload_file: "tests/data/upload_test.png"
