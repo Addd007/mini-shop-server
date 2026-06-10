@@ -2,8 +2,7 @@
 """
   Created by Allen7D on 2020/4/16.
 """
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, \
-    SignatureExpired, BadSignature
+from itsdangerous import URLSafeTimedSerializer as Serializer, BadSignature, SignatureExpired
 
 from flask import current_app
 
@@ -52,17 +51,15 @@ class LoginVerifyService():
         '''
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.loads(token, return_header=True)  # token在POST中
+            data = s.loads(token, max_age=7200)  # token在POST中
         except BadSignature:
             raise AuthFailed(msg='token失效，请重新登录', error_code=1002)
         except SignatureExpired:
             raise AuthFailed(msg='token过期，请重新登录', error_code=1003)
 
         rv = {
-            'scope': data[0]['scope'],  # 用户权限
-            'uid': data[0]['uid'],  # 用户ID
-            'create_at': data[1]['iat'],  # 创建时间
-            'expire_in': data[1]['exp']  # 有效期
+            'scope': data['scope'],  # 用户权限
+            'uid': data['uid'],  # 用户ID
         }
 
         return rv

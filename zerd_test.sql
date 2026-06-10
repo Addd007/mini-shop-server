@@ -14,11 +14,11 @@ INSERT INTO user (id, nickname, auth, group_id, avatar, extend, create_time, upd
 (3, 'bob', 0, 2, 'bob.png', '测试用户B', 1710000200, 1710000200, NULL);
 
 INSERT INTO identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES
-(1, 1, 1, 'admin', 'admin123456', 1, 1710000000, 1710000000, NULL),
-(2, 1, 2, '13800000000', 'admin123456', 1, 1710000000, 1710000000, NULL),
-(3, 2, 1, 'alice', 'alice123456', 1, 1710000100, 1710000100, NULL),
-(4, 2, 2, '13900000000', 'alice123456', 1, 1710000100, 1710000100, NULL),
-(5, 3, 1, 'bob', 'bob123456', 1, 1710000200, 1710000200, NULL);
+(1, 1, 100, 'admin', 'admin123456', 1, 1710000000, 1710000000, NULL),
+(2, 1, 102, '13800000000', 'admin123456', 1, 1710000000, 1710000000, NULL),
+(3, 2, 100, 'alice', 'alice123456', 1, 1710000100, 1710000100, NULL),
+(4, 2, 102, '13900000000', 'alice123456', 1, 1710000100, 1710000100, NULL),
+(5, 3, 100, 'bob', 'bob123456', 1, 1710000200, 1710000200, NULL);
 
 INSERT INTO address (id, name, mobile, province, city, country, detail, user_id, create_time, update_time, delete_time) VALUES
 (1, 'Alice收', '13900000000', '广东省', '深圳市', '南山区', '科技园A座1001', 2, 1710000300, 1710000300, NULL),
