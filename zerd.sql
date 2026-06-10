@@ -289,7 +289,7 @@ create table identity
     type        int          not null comment '登录类型',
     identifier  varchar(100) null comment '标识(手机号、邮箱、用户名或第三方应用的唯一标识)',
     credential  varchar(100) null comment '密码凭证(站内的保存密码，站外的不保存或保存token)',
-    verified    smallint     null comment '是否已经验证',
+    verified    smallint     null comment '是否已经验证',   
     create_time int          null comment '创建时间',
     update_time int          null comment '更新时间',
     delete_time int          null comment '删除时间',
