@@ -5,6 +5,8 @@
   headers: {}
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-FILE-002
   method: GET
@@ -17,6 +19,8 @@
     size: 10
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-FILE-003
   method: GET
@@ -25,3 +29,5 @@
   headers: {}
   expected:
     status_code: 200
+    json:
+      error_code: 0

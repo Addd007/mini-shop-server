@@ -9,6 +9,8 @@
         count: 1
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-ORDER-002
   method: GET
@@ -17,6 +19,8 @@
   headers: {}
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-ORDER-003
   method: GET
@@ -28,6 +32,8 @@
     size: 10
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-ORDER-004
   method: POST
@@ -36,6 +42,8 @@
   headers: {}
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-ORDER-008
   method: POST

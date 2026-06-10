@@ -9,6 +9,8 @@
     type: 100
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-AUTH-002
   method: POST
@@ -21,6 +23,8 @@
     type: 100
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-AUTH-003
   method: POST
@@ -33,6 +37,8 @@
     type: 100
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-AUTH-004
   method: POST

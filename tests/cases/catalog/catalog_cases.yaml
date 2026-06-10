@@ -7,6 +7,8 @@
     count: 5
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-PROD-002
   method: GET
@@ -15,6 +17,8 @@
   headers: {}
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-PROD-003
   method: GET
@@ -27,6 +31,8 @@
     size: 10
   expected:
     status_code: 200
+    json:
+      error_code: 0
 
 - id: TC-PROD-009
   method: GET
@@ -35,3 +41,5 @@
   headers: {}
   expected:
     status_code: 200
+    json:
+      error_code: 0
