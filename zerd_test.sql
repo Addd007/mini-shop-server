@@ -11,18 +11,19 @@ INSERT INTO `group` (id, name, info) VALUES
 INSERT INTO user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES
 (1, 'admin', 1, 1, 'admin.png', '系统管理员', 1710000000, 1710000000, NULL),
 (2, 'alice', 0, 2, 'alice.png', '测试用户A', 1710000100, 1710000100, NULL),
-(3, 'bob', 0, 2, 'bob.png', '测试用户B', 1710000200, 1710000200, NULL);
+(3, 'bobe', 0, 2, 'bobe.png', '测试用户B', 1710000200, 1710000200, NULL);
 
+--明文密码都是用户名加上123456，例如1号的密码是admin123456
 INSERT INTO identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES
-(1, 1, 100, 'admin', 'admin123456', 1, 1710000000, 1710000000, NULL),
-(2, 1, 102, '13800000000', 'admin123456', 1, 1710000000, 1710000000, NULL),
-(3, 2, 100, 'alice', 'alice123456', 1, 1710000100, 1710000100, NULL),
-(4, 2, 102, '13900000000', 'alice123456', 1, 1710000100, 1710000100, NULL),
-(5, 3, 100, 'bob', 'bob123456', 1, 1710000200, 1710000200, NULL);
+(1, 1, 100, 'admin', 'ac0e7d037817094e9e0b4441f9bae3209d67b02fa484917065f71b16109a1a78', 1, 1710000000, 1710000000, NULL),
+(2, 1, 102, '13800000000', 'ac0e7d037817094e9e0b4441f9bae3209d67b02fa484917065f71b16109a1a78', 1, 1710000000, 1710000000, NULL),
+(3, 2, 100, 'alice', '5e91579f083d98222f4c3b814ee61380be90c3ed5209b76e334e4b5c9882eac8', 1, 1710000100, 1710000100, NULL),
+(4, 2, 102, '13900000000', '5e91579f083d98222f4c3b814ee61380be90c3ed5209b76e334e4b5c9882eac8', 1, 1710000100, 1710000100, NULL),
+(5, 3, 100, 'bobe', '89ddecd47dc0a04a2eaa1f3a75410903e89e470a293e517ccbe4687b6f1aa99e', 1, 1710000200, 1710000200, NULL);
 
 INSERT INTO address (id, name, mobile, province, city, country, detail, user_id, create_time, update_time, delete_time) VALUES
 (1, 'Alice收', '13900000000', '广东省', '深圳市', '南山区', '科技园A座1001', 2, 1710000300, 1710000300, NULL),
-(2, 'Bob收', '13700000000', '北京市', '北京市', '朝阳区', '望京SOHO T2', 3, 1710000400, 1710000400, NULL);
+(2, 'Bobe收', '13700000000', '北京市', '北京市', '朝阳区', '望京SOHO T2', 3, 1710000400, 1710000400, NULL);
 
 INSERT INTO image (id, url, `from`, create_time, update_time, delete_time) VALUES
 (1, '/images/banner-1.jpg', 1, 1710000000, 1710000000, NULL),
@@ -160,7 +161,7 @@ INSERT INTO file (id, parent_id, uuid_name, name, path, extension, `from`, size,
 INSERT INTO login_log (id, user_id, user_name, ip_addr, location, browser, os, message, status, create_time) VALUES
 (1, 1, 'admin', '127.0.0.1', '本机', 'Chrome', 'macOS', '登录成功', 1, 1710000000),
 (2, 2, 'alice', '127.0.0.1', '本机', 'Chrome', 'macOS', '登录成功', 1, 1710000100),
-(3, 3, 'bob', '127.0.0.1', '本机', 'Safari', 'macOS', '密码错误', 0, 1710000200);
+(3, 3, 'bobe', '127.0.0.1', '本机', 'Safari', 'macOS', '密码错误', 0, 1710000200);
 
 INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES
 (1, 'user', '新增用户', 1, 'admin', '/api/user', 'POST', JSON_OBJECT('nickname', 'test_user'), 'user.create', 1, 'user:add', 200, 1710000000),
@@ -180,7 +181,7 @@ INSERT INTO article (id, author_id, type, title, summary, content, theme, img, v
 
 INSERT INTO `order` (id, order_no, user_id, order_status, snap_img, snap_name, snap_items, snap_address, total_count, total_price, prepay_id, create_time, update_time, delete_time) VALUES
 (1, '202606090001', 2, 2, '/images/product-1-main.jpg', 'iPhone 15', '{"products":[{"id":1,"name":"iPhone 15","price":6999,"count":1}]}', '{"name":"Alice收","mobile":"13900000000","detail":"科技园A座1001"}', 1, 6999.00, 'wx_prepay_0001', 1710000300, 1710000400, NULL),
-(2, '202606090002', 3, 1, '/images/product-2-main.jpg', 'ThinkPad X1', '{"products":[{"id":2,"name":"ThinkPad X1","price":12999,"count":1},{"id":3,"name":"小米充电宝","price":199,"count":2}]}', '{"name":"Bob收","mobile":"13700000000","detail":"望京SOHO T2"}', 3, 13397.00, 'wx_prepay_0002', 1710000500, 1710000500, NULL);
+(2, '202606090002', 3, 1, '/images/product-2-main.jpg', 'ThinkPad X1', '{"products":[{"id":2,"name":"ThinkPad X1","price":12999,"count":1},{"id":3,"name":"小米充电宝","price":199,"count":2}]}', '{"name":"bobe收","mobile":"13700000000","detail":"望京SOHO T2"}', 3, 13397.00, 'wx_prepay_0002', 1710000500, 1710000500, NULL);
 
 INSERT INTO order_product (order_id, product_id, count, create_time, update_time, delete_time) VALUES
 (1, 1, 1, 1710000300, 1710000400, NULL),
