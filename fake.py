@@ -4,41 +4,82 @@
 """
 from app import create_app
 from app.core.db import db
+from app.libs.enums import ClientTypeEnum, ScopeEnum
+from app.models.identity import Identity
 from app.models.user import User
 
 __author__ = 'Allen7D'
 
+
+def get_user_by_identifier(identifier):
+    identity = Identity.get(identifier=identifier)
+    return User.query.get(identity.user_id) if identity else None
+
+
+def save_identity(user_id, identity_type, identifier, password=None, credential=None):
+    identity = Identity.get(type=identity_type, identifier=identifier)
+    if identity is None:
+        identity = Identity()
+        identity.user_id = user_id
+        identity.type = identity_type
+        identity.identifier = identifier
+        db.session.add(identity)
+    else:
+        identity.user_id = user_id
+
+    if password is not None:
+        identity.password = password
+    if credential is not None:
+        identity.credential = credential
+
+    return identity
+
+
+def create_user(nickname, auth, username, email, openid, password):
+    user = get_user_by_identifier(username) \
+        or get_user_by_identifier(email) \
+        or get_user_by_identifier(openid)
+
+    if user is None:
+        user = User()
+        db.session.add(user)
+        db.session.flush()
+
+    user.nickname = nickname
+    user.auth = auth
+
+    save_identity(user.id, ClientTypeEnum.USERNAME.value, username, password=password)
+    save_identity(user.id, ClientTypeEnum.EMAIL.value, email, password=password)
+    save_identity(user.id, ClientTypeEnum.WX_MINA.value, openid, credential='')
+
+    return user
+
+
 app = create_app()
 with app.app_context():
     with db.auto_commit():
-        # 创建一个超级管理员
-        user = User()
-        user.openid = '999'
-        user.email = '999@qq.com'
-        user.nickname = '超级管理员'
-        user.username = 'super'
-        user.auth = 2
-        user.password = '123456'
-        db.session.add(user)
+        create_user(
+            nickname='超级管理员',
+            auth=ScopeEnum.ADMIN.value,
+            username='super',
+            email='999@qq.com',
+            openid='999',
+            password='123456'
+        )
+        create_user(
+            nickname='普通管理员',
+            auth=ScopeEnum.COMMON.value,
+            username='admin',
+            email='777@qq.com',
+            openid='777',
+            password='123456'
+        )
+        create_user(
+            nickname='普通用户',
+            auth=ScopeEnum.COMMON.value,
+            username='user',
+            email='111@qq.com',
+            openid='111',
+            password='123456'
+        )
 
-    with db.auto_commit():
-        # 创建一个普通管理员
-        user = User()
-        user.openid = '777'
-        user.email = '777@qq.com'
-        user.nickname = '普通管理员'
-        user.username = 'admin'
-        user.auth = 1
-        user.password = '123456'
-        db.session.add(user)
-
-    with db.auto_commit():
-        # 创建一个用户
-        user = User()
-        user.openid = '111'
-        user.email = '111@qq.com'
-        user.nickname = '我是用户'
-        user.username = 'user'
-        user.auth = 1
-        user.password = '123456'
-        db.session.add(user)
