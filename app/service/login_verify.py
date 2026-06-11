@@ -68,6 +68,8 @@ class LoginVerifyService():
     def verify_by_username(username, password):
         identity = Identity.get_or_404(identifier=username, type=ClientTypeEnum.USERNAME.value,
                                        e=IdentityException(msg='该用户名未注册'))
+        if identity.identifier != username:
+            raise IdentityException(msg='该用户名未注册')
         identity.check_password(password, e=AuthFailed(msg='密码错误'))
         user = User.get(id=identity.user_id)
         return {'uid': user.id, 'scope': user.auth_scope}

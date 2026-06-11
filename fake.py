@@ -35,9 +35,10 @@ def save_identity(user_id, identity_type, identifier, password=None, credential=
     return identity
 
 
-def create_user(nickname, auth, username, email, openid, password):
+def create_user(nickname, auth, username, email, mobile, openid, password):
     user = get_user_by_identifier(username) \
         or get_user_by_identifier(email) \
+        or get_user_by_identifier(mobile) \
         or get_user_by_identifier(openid)
 
     if user is None:
@@ -50,6 +51,7 @@ def create_user(nickname, auth, username, email, openid, password):
 
     save_identity(user.id, ClientTypeEnum.USERNAME.value, username, password=password)
     save_identity(user.id, ClientTypeEnum.EMAIL.value, email, password=password)
+    save_identity(user.id, ClientTypeEnum.MOBILE.value, mobile, password=password)
     save_identity(user.id, ClientTypeEnum.WX_MINA.value, openid, credential='')
 
     return user
@@ -63,6 +65,7 @@ with app.app_context():
             auth=ScopeEnum.ADMIN.value,
             username='super',
             email='999@qq.com',
+            mobile='19900000001',
             openid='999',
             password='123456'
         )
@@ -71,6 +74,7 @@ with app.app_context():
             auth=ScopeEnum.COMMON.value,
             username='admin',
             email='777@qq.com',
+            mobile='19900000002',
             openid='777',
             password='123456'
         )
@@ -79,6 +83,7 @@ with app.app_context():
             auth=ScopeEnum.COMMON.value,
             username='user',
             email='111@qq.com',
+            mobile='19900000003',
             openid='111',
             password='123456'
         )

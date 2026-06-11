@@ -87,8 +87,8 @@ class ClientValidator(BaseValidator):
     def validate_type(self, value):
         try:
             client = ClientTypeEnum(value.data)
-        except ValueError as e:
-            raise e
+        except ValueError:
+            raise ValidationError(message='登录方式无效')
         self.type.data = client
 
 
