@@ -87,7 +87,7 @@ class OrderService():
         snap['p_status'] = status['p_status_array']
         snap['snap_address'] = json.dumps(self.__get_address(), ensure_ascii=False)  # 建议:放在非关系型数据库(MongoDB)
         snap['snap_name'] = self.s_products[0]['name'] + (' 等' if len(self.s_products) > 1 else '')
-        snap['snap_img'] = self.s_products[0]['main_img_url']
+        snap['snap_img'] = self.s_products[0].main_image
 
         return snap
 
