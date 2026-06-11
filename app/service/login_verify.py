@@ -9,7 +9,7 @@ from flask import current_app
 from app.core.token_auth import generate_auth_token
 from app.core.logger import record_login_log
 from app.libs.enums import ClientTypeEnum
-from app.libs.error_code import AuthFailed, IdentityException
+from app.libs.error_code import AuthFailed, IdentityException, UserNotFound
 from app.models.identity import Identity
 from app.models.user import User
 from app.dao.user import UserDao
@@ -72,6 +72,8 @@ class LoginVerifyService():
             raise IdentityException(msg='该用户名未注册')
         identity.check_password(password, e=AuthFailed(msg='密码错误'))
         user = User.get(id=identity.user_id)
+        if not user:
+            raise UserNotFound(msg='用户不存在')
         return {'uid': user.id, 'scope': user.auth_scope}
 
     @staticmethod
@@ -80,6 +82,8 @@ class LoginVerifyService():
                                        e=IdentityException(msg='该邮箱未注册'))
         identity.check_password(password, e=AuthFailed(msg='密码错误'))
         user = User.get(id=identity.user_id)
+        if not user:
+            raise UserNotFound(msg='用户不存在')
         return {'uid': user.id, 'scope': user.auth_scope}
 
     @staticmethod
@@ -88,6 +92,8 @@ class LoginVerifyService():
                                        e=IdentityException(msg='该手机号未注册'))
         identity.check_password(password, e=AuthFailed(msg='密码错误'))
         user = User.get(id=identity.user_id)
+        if not user:
+            raise UserNotFound(msg='用户不存在')
         return {'uid': user.id, 'scope': user.auth_scope}
 
     @staticmethod
