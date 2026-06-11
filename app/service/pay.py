@@ -56,12 +56,12 @@ class PayService():
         '''对订单作3种情况的检测'''
         # 1. 验证订单号是否存在
         order = Order.query.filter_by(id=self.order_id) \
-            .first_or_404(e=OrderException)
+            .first_or_404(e=OrderException(msg='订单不存在', error_code=50010))
         # 2. 如果订单号存在的，验证订单号与当前用户是否匹配
         if not TokenDao.is_valid_operate(order.user_id):
             raise TokenException(msg='订单与用户不匹配', error_code=1003)
         # 3. 验证订单是否已经被支付过
-        if order.order_status != OrderStatusEnum.UNPAID:
+        if order.order_status != OrderStatusEnum.UNPAID.value:
             raise OrderException(
                 msg='订单已支付',
                 error_code=8003,
