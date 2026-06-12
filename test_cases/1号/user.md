@@ -33,6 +33,8 @@
 | TC-USER-024 | PUT    | `/v1/user/unbind`   | 账号解绑 | 解绑绑定账号               | 已登录                 | `type=101`                                                                                          | 解绑成功                         | P1  |
 | TC-USER-025 | PUT    | `/v1/user/unbind`   | 账号解绑 | 解绑不存在的账号             | 已登录                 | `type=101`                                                                                          | 解绑失败返回未查询到数据                 | P1  |
 | TC-USER-026 | DELETE | `/v1/user`          | 注销账号 | 注销当前账号               | 已登录                 | 无                                                                                                   | 注销成功或返回确认结果                  | P2  |
+| TC-USER-027 | POST   | `/v1/user`          | 注册恢复 | 用户名+手机号匹配已删除账号时复用    | 存在已删除账号且用户名、手机号均同名  | `nickname="普通用户"` `username="user"` `mobile=19900000003` `email=new@qq.com`                         | 复用已删除账号，补充邮箱/更新信息            | P1  |
+| TC-USER-028 | POST   | `/v1/user`          | 注册恢复 | 用户名+邮箱匹配已删除账号时复用     | 存在已删除账号且用户名、邮箱均同名   | `nickname="普通用户"` `username="user"` `mobile=10000000000` `email=111@qq.com`                         | 复用已删除账号，补充手机号/更新信息           | P1  |
 
 
 ## 回归建议

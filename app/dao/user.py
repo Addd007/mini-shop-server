@@ -53,21 +53,95 @@ class UserDao():
     # 站内注册(用户名、手机号、邮箱、密码)
     @staticmethod
     def create_user(form):
+        def _has(attr):
+            return hasattr(form, attr) and getattr(form, attr) is not None
+
+        def _find_deleted_identity(identity_type, identifier):
+            if identifier is None:
+                return None
+            return db.session.query(Identity).filter(
+                Identity.type == identity_type,
+                Identity.identifier == identifier,
+                Identity.delete_time != None
+            ).first()
+
+        def _find_active_identity(identifier):
+            return db.session.query(Identity).filter(
+                Identity.identifier == identifier,
+                Identity.delete_time == None
+            ).first()
+
         with db.auto_commit():
+            username = getattr(form, 'username', None) if _has('username') else None
+            mobile = getattr(form, 'mobile', None) if _has('mobile') else None
+            email = getattr(form, 'email', None) if _has('email') else None
+            nickname = getattr(form, 'nickname', None)
+
+            reuse_user = None
+            username_identity = _find_deleted_identity(ClientTypeEnum.USERNAME.value, username) if username else None
+            mobile_identity = _find_deleted_identity(ClientTypeEnum.MOBILE.value, mobile) if mobile else None
+            email_identity = _find_deleted_identity(ClientTypeEnum.EMAIL.value, email) if email else None
+
+            # 复用条件：用户名 + 手机号 / 用户名 + 邮箱 / 用户名 + 手机号 + 邮箱
+            # 只要能命中同一个软删除账号，并且该账号没有被其他活跃 identity 占用，就允许复用并补全缺失信息
+            candidate_user_ids = []
+            if username_identity and mobile_identity and username_identity.user_id == mobile_identity.user_id:
+                candidate_user_ids.append(username_identity.user_id)
+            if username_identity and email_identity and username_identity.user_id == email_identity.user_id:
+                candidate_user_ids.append(username_identity.user_id)
+
+            if candidate_user_ids:
+                candidate_user_id = candidate_user_ids[0]
+                if (not mobile_identity or mobile_identity.user_id == candidate_user_id) and \
+                   (not email_identity or email_identity.user_id == candidate_user_id):
+                    reuse_user = User.query.filter(
+                        User.id == candidate_user_id,
+                        User.delete_time != None
+                    ).first()
+
+            if reuse_user:
+                reuse_user.delete_time = None
+                reuse_user.nickname = nickname or reuse_user.nickname
+                reuse_user.auth = ScopeEnum.COMMON.value
+
+                current_identities = db.session.query(Identity).filter(Identity.user_id == reuse_user.id).all()
+                identity_map = {item.type: item for item in current_identities}
+                credential = form.password
+
+                for identity_type, identifier, verified in [
+                    (ClientTypeEnum.USERNAME.value, username, 1),
+                    (ClientTypeEnum.MOBILE.value, mobile, 0),
+                    (ClientTypeEnum.EMAIL.value, email, 0),
+                ]:
+                    if identifier is None:
+                        continue
+                    active_conflict = _find_active_identity(identifier)
+                    if active_conflict and active_conflict.user_id != reuse_user.id:
+                        raise RepeatException(msg='该账号已被使用，请重新输入新的账号')
+
+                    identity = identity_map.get(identity_type)
+                    if identity:
+                        identity.delete_time = None
+                        identity.update(commit=False, identifier=identifier, credential=credential)
+                    else:
+                        Identity.create(commit=False, user_id=reuse_user.id, type=identity_type,
+                                        verified=verified, identifier=identifier, password=credential)
+                return reuse_user
+
             user = User.create(
                 commit=False,
-                nickname=getattr(form, 'nickname', None),
+                nickname=nickname,
                 auth=ScopeEnum.COMMON.value
             )
-            if (hasattr(form, 'username')):
+            if _has('username'):
                 Identity.abort_repeat(identifier=form.username, msg='该用户名已被使用，请重新输入新的用户名')
                 Identity.create(commit=False, user_id=user.id, type=ClientTypeEnum.USERNAME.value, verified=1,
                                 identifier=form.username, password=form.password)
-            if (hasattr(form, 'mobile')):
+            if _has('mobile'):
                 Identity.abort_repeat(identifier=form.mobile, msg='手机号已被使用，请重新输入新的手机号')
                 Identity.create(commit=False, user_id=user.id, type=ClientTypeEnum.MOBILE.value,
                                 identifier=form.mobile, password=form.password)
-            if (hasattr(form, 'email')):
+            if _has('email'):
                 Identity.abort_repeat(identifier=form.email, msg='邮箱已被使用，请重新输入新的邮箱号')
                 Identity.create(commit=False, user_id=user.id, type=ClientTypeEnum.EMAIL.value,
                                 identifier=form.email, password=form.password)

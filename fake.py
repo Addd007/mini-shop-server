@@ -12,12 +12,17 @@ __author__ = 'Allen7D'
 
 
 def get_user_by_identifier(identifier):
-    identity = Identity.get(identifier=identifier)
+    identity = db.session.query(Identity).filter(
+        Identity.identifier == identifier
+    ).first()
     return User.query.get(identity.user_id) if identity else None
 
 
 def save_identity(user_id, identity_type, identifier, password=None, credential=None):
-    identity = Identity.get(type=identity_type, identifier=identifier)
+    identity = db.session.query(Identity).filter(
+        Identity.type == identity_type,
+        Identity.identifier == identifier
+    ).first()
     if identity is None:
         identity = Identity()
         identity.user_id = user_id
@@ -26,6 +31,7 @@ def save_identity(user_id, identity_type, identifier, password=None, credential=
         db.session.add(identity)
     else:
         identity.user_id = user_id
+        identity.delete_time = None
 
     if password is not None:
         identity.password = password
@@ -45,6 +51,8 @@ def create_user(nickname, auth, username, email, mobile, openid, password):
         user = User()
         db.session.add(user)
         db.session.flush()
+    else:
+        user.delete_time = None
 
     user.nickname = nickname
     user.auth = auth

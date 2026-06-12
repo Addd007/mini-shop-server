@@ -1,63 +1,310 @@
+# 登录与鉴权测试用例 - 基于 test_cases/1号/auth.md
+# 覆盖：用户名登录、邮箱登录、手机号登录、异常登录、参数校验、Token 校验
+
+# ======================== 登录成功 ========================
+
 - id: TC-AUTH-001
+  summary: 超级管理员用户名登录成功
+  tag: login_success
+  priority: P0
   method: POST
   path: /v1/token
-  summary: 管理员账号登录成功
-  headers: {}
   json:
-    account: admin
-    secret: admin123456
+    account: super
+    secret: "123456"
     type: 100
   expected:
     status_code: 200
-    json:
-      error_code: 0
+    has_token: true
 
 - id: TC-AUTH-002
+  summary: 普通管理员用户名登录成功
+  tag: login_success
+  priority: P0
   method: POST
   path: /v1/token
-  summary: 普通用户 A 登录成功
-  headers: {}
   json:
-    account: alice
-    secret: alice123456
+    account: admin
+    secret: "123456"
     type: 100
   expected:
     status_code: 200
-    json:
-      error_code: 0
+    has_token: true
 
 - id: TC-AUTH-003
+  summary: 普通用户用户名登录成功
+  tag: login_success
+  priority: P0
   method: POST
   path: /v1/token
-  summary: 普通用户 B 登录成功
-  headers: {}
   json:
-    account: bob
-    secret: bob123456
+    account: user
+    secret: "123456"
     type: 100
   expected:
     status_code: 200
-    json:
-      error_code: 0
+    has_token: true
 
 - id: TC-AUTH-004
+  summary: 超级管理员邮箱登录成功
+  tag: login_success
+  priority: P0
   method: POST
   path: /v1/token
-  summary: 密码错误登录失败
-  headers: {}
   json:
-    account: bob
+    account: 999@qq.com
+    secret: "123456"
+    type: 101
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: TC-AUTH-005
+  summary: 普通管理员邮箱登录成功
+  tag: login_success
+  priority: P1
+  method: POST
+  path: /v1/token
+  json:
+    account: 777@qq.com
+    secret: "123456"
+    type: 101
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: TC-AUTH-006
+  summary: 普通用户邮箱登录成功
+  tag: login_success
+  priority: P1
+  method: POST
+  path: /v1/token
+  json:
+    account: 111@qq.com
+    secret: "123456"
+    type: 101
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: TC-AUTH-007
+  summary: 邮箱大小写混合登录成功
+  tag: login_success
+  priority: P2
+  method: POST
+  path: /v1/token
+  json:
+    account: 999@Qq.CoM
+    secret: "123456"
+    type: 101
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: TC-AUTH-008
+  summary: 超级管理员手机号登录成功
+  tag: login_success
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: "19900000001"
+    secret: "123456"
+    type: 102
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: TC-AUTH-009
+  summary: 普通管理员手机号登录成功
+  tag: login_success
+  priority: P1
+  method: POST
+  path: /v1/token
+  json:
+    account: "19900000002"
+    secret: "123456"
+    type: 102
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: TC-AUTH-010
+  summary: 普通用户手机号登录成功
+  tag: login_success
+  priority: P1
+  method: POST
+  path: /v1/token
+  json:
+    account: "19900000003"
+    secret: "123456"
+    type: 102
+  expected:
+    status_code: 200
+    has_token: true
+
+# ======================== 登录失败 ========================
+
+- id: TC-AUTH-011
+  summary: 密码错误登录失败
+  tag: login_failure
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: user
     secret: wrong-password
     type: 100
   expected:
-    status_code: 200
+    has_token: false
+    error: true
 
-- id: TC-AUTH-008
+- id: TC-AUTH-012
+  summary: 用户名不存在登录失败
+  tag: login_failure
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: ghost
+    secret: "123456"
+    type: 100
+  expected:
+    has_token: false
+    error: true
+
+- id: TC-AUTH-013
+  summary: 邮箱不存在登录失败
+  tag: login_failure
+  priority: P1
+  method: POST
+  path: /v1/token
+  json:
+    account: ghost@qq.com
+    secret: "123456"
+    type: 101
+  expected:
+    has_token: false
+    error: true
+
+- id: TC-AUTH-014
+  summary: 手机号不存在登录失败
+  tag: login_failure
+  priority: P1
+  method: POST
+  path: /v1/token
+  json:
+    account: "19999999999"
+    secret: "123456"
+    type: 102
+  expected:
+    has_token: false
+    error: true
+
+- id: TC-AUTH-015
+  summary: 登录类型无效
+  tag: login_failure
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: user
+    secret: "123456"
+    type: 999
+  expected:
+    has_token: false
+    error: true
+
+- id: TC-AUTH-016
+  summary: 用户名大小写不匹配登录失败
+  tag: login_failure
+  priority: P2
+  method: POST
+  path: /v1/token
+  json:
+    account: Super
+    secret: "123456"
+    type: 100
+  expected:
+    has_token: false
+    error: true
+
+# ======================== 参数校验 ========================
+
+- id: TC-AUTH-018
+  summary: 空账号登录校验
+  tag: validation
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: ""
+    secret: "123456"
+    type: 100
+  expected:
+    has_token: false
+    error: true
+
+- id: TC-AUTH-019
+  summary: 空密码登录校验
+  tag: validation
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: user
+    secret: ""
+    type: 100
+  expected:
+    has_token: false
+    error: true
+
+- id: TC-AUTH-020
+  summary: 缺少登录类型
+  tag: validation
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: user
+    secret: "123456"
+  expected:
+    has_token: false
+    error: true
+
+# ======================== Token 校验 ========================
+
+- id: TC-AUTH-021
+  summary: 未携带 Token 访问校验接口
+  tag: token_verify
+  priority: P0
   method: POST
   path: /v1/token/verify
-  summary: 伪造 Token 校验失败
-  headers: {}
+  json:
+    token: ""
+  expected:
+    error: true
+
+- id: TC-AUTH-022
+  summary: 伪造 Token 访问校验接口
+  tag: token_verify
+  priority: P0
+  method: POST
+  path: /v1/token/verify
   json:
     token: fake-token
   expected:
+    error: true
+
+- id: TC-AUTH-023
+  summary: 有效 Token 访问校验接口
+  tag: token_verify
+  priority: P0
+  method: POST
+  path: /v1/token/verify
+  json:
+    token: "{valid_token}"
+  expected:
     status_code: 200
+    json:
+      error_code: 0

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 import requests
+from requests.auth import HTTPBasicAuth
 
 
 class ApiClient:
@@ -12,13 +13,16 @@ class ApiClient:
         self.token = token
         self.session = requests.Session()
 
-    def _headers(self, extra: Optional[Dict[str, str]] = None) -> Dict[str, str]:
-        headers: Dict[str, str] = {"Accept": "application/json"}
+    def _request_kwargs(self, extra: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+        kwargs: Dict[str, Any] = {
+            "headers": {"Accept": "application/json"},
+        }
         if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
+            # 后端认证方式与 Postman 一致：Basic Auth，username 为 token，password 固定为 132
+            kwargs["auth"] = HTTPBasicAuth(self.token, "132")
         if extra:
-            headers.update(extra)
-        return headers
+            kwargs["headers"].update(extra)
+        return kwargs
 
     def request(
         self,
@@ -39,6 +43,6 @@ class ApiClient:
             json=json,
             data=data,
             files=files,
-            headers=self._headers(headers),
             timeout=self.timeout,
+            **self._request_kwargs(headers),
         )

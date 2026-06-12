@@ -1,0 +1,381 @@
+# 用户接口测试用例 - 基于 test_cases/1号/user.md
+# 覆盖：用户信息查询、权限查询、资料修改、头像修改、密码修改、账号绑定解绑、注销
+
+# ======================== 用户信息查询 ========================
+
+- id: TC-USER-001
+  summary: 查询当前登录用户信息及字段完整性
+  tag: user_info
+  priority: P0
+  method: GET
+  path: /v1/user
+  auth: super
+  json: {}
+  expected:
+    status_code: 200
+    has_fields:
+      - nickname
+      - auth
+
+- id: TC-USER-002
+  summary: 未携带 Token 查询当前用户失败
+  tag: user_info
+  priority: P0
+  method: GET
+  path: /v1/user
+  auth: none
+  json: {}
+  expected:
+    error: true
+
+# ======================== 权限查询 ========================
+
+- id: TC-USER-003
+  summary: 普通管理员查询自身权限成功
+  tag: user_auths
+  priority: P1
+  method: GET
+  path: /v1/user/auths
+  auth: admin
+  json: {}
+  expected:
+    status_code: 200
+
+- id: TC-USER-004
+  summary: 未分配权限组的普通用户查询权限返回空列表
+  tag: user_auths
+  priority: P1
+  method: GET
+  path: /v1/user/auths
+  auth: user
+  json: {}
+  expected:
+    status_code: 200
+
+# ======================== 头像修改 ========================
+
+- id: TC-USER-005
+  summary: 更新用户头像
+  tag: avatar
+  priority: P1
+  method: PUT
+  path: /v1/user/avatar
+  auth: super
+  json:
+    avatar: "http://abc/xzy.jpg"
+  expected:
+    status_code: 201
+
+# ======================== 密码修改 ========================
+
+- id: TC-USER-006
+  summary: 修改当前用户密码成功
+  tag: password
+  priority: P0
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "1234567"
+    confirm_password: "1234567"
+  expected:
+    status_code: 201
+  teardown: reset_user_password
+
+- id: TC-USER-007
+  summary: 旧密码错误修改失败
+  tag: password
+  priority: P0
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "wrong-password"
+    new_password: "1234567"
+    confirm_password: "1234567"
+  expected:
+    error: true
+
+- id: TC-USER-008
+  summary: 新密码长度 5 位校验失败
+  tag: password
+  priority: P1
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "12345"
+    confirm_password: "12345"
+  expected:
+    error: true
+
+- id: TC-USER-009
+  summary: 新密码长度 6 位校验通过
+  tag: password
+  priority: P1
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "123456"
+    confirm_password: "123456"
+  expected:
+    status_code: 201
+
+- id: TC-USER-010
+  summary: 新密码长度 22 位校验通过
+  tag: password
+  priority: P2
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "Abc123_Abc123_Abc123"
+    confirm_password: "Abc123_Abc123_Abc123"
+  expected:
+    status_code: 201
+  teardown: reset_user_password
+
+- id: TC-USER-011
+  summary: 新密码长度 23 位校验失败
+  tag: password
+  priority: P1
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "Abc123_Abc123_Abc1234"
+    confirm_password: "Abc123_Abc123_Abc1234"
+  expected:
+    status_code: 400
+
+- id: TC-USER-012
+  summary: 新密码包含非法字符校验失败
+  tag: password
+  priority: P1
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "1234567!"
+    confirm_password: "1234567!"
+  expected:
+    error: true
+
+- id: TC-USER-013
+  summary: 两次输入的新密码不一致校验失败
+  tag: password
+  priority: P1
+  method: PUT
+  path: /v1/user/password
+  auth: user
+  json:
+    old_password: "123456"
+    new_password: "1234567"
+    confirm_password: "7654321"
+  expected:
+    error: true
+
+# ======================== 资料修改 ========================
+
+- id: TC-USER-014
+  summary: 更新当前用户资料
+  tag: profile
+  priority: P1
+  method: PUT
+  path: /v1/user
+  auth: super
+  json:
+    username:  "superme"
+    nickname: "Superme"
+    mobile: "13758787058"
+    email: "462870781@qq.com"
+  expected:
+    status_code: 400
+  teardown: reset_super_profile
+
+- id: TC-USER-015
+  summary: 同时提交原用户名、原手机号、原邮箱成功
+  tag: profile
+  priority: P1
+  method: PUT
+  path: /v1/user
+  auth: user
+  json:
+    username: "user"
+    mobile: "19900000003"
+    email: "111@qq.com"
+    nickname: "普通用户"
+  expected:
+    status_code: 201
+
+- id: TC-USER-016
+  summary: 更新为其他用户已占用用户名失败
+  tag: profile_conflict
+  priority: P1
+  method: PUT
+  path: /v1/user
+  auth: user
+  json:
+    username: "admin"
+  expected:
+    error: true
+
+- id: TC-USER-017
+  summary: 更新为其他用户已占用手机号失败
+  tag: profile_conflict
+  priority: P1
+  method: PUT
+  path: /v1/user
+  auth: user
+  json:
+    mobile: "19900000002"
+  expected:
+    error: true
+
+- id: TC-USER-018
+  summary: 更新为其他用户已占用邮箱失败
+  tag: profile_conflict
+  priority: P1
+  method: PUT
+  path: /v1/user
+  auth: user
+  json:
+    email: "777@qq.com"
+  expected:
+    error: true
+
+# ======================== 账号绑定 ========================
+
+- id: TC-USER-020
+  summary: 已绑定邮箱时再次绑定邮箱失败
+  tag: bind
+  priority: P1
+  method: PUT
+  path: /v1/user/bind
+  auth: user
+  json:
+    account: "another_email@qq.com"
+    type: 101
+  expected:
+    error: true
+
+- id: TC-USER-021
+  summary: 已绑定手机号时再次绑定手机号失败
+  tag: bind
+  priority: P1
+  method: PUT
+  path: /v1/user/bind
+  auth: user
+  json:
+    account: "19900000009"
+    type: 102
+  expected:
+    error: true
+
+- id: TC-USER-022
+  summary: 绑定其他用户已占用邮箱失败
+  tag: bind
+  priority: P1
+  method: PUT
+  path: /v1/user/bind
+  auth: user
+  json:
+    account: "777@qq.com"
+    type: 101
+  expected:
+    error: true
+
+- id: TC-USER-023
+  summary: 绑定其他用户已占用手机号失败
+  tag: bind
+  priority: P1
+  method: PUT
+  path: /v1/user/bind
+  auth: user
+  json:
+    account: "19900000002"
+    type: 102
+  expected:
+    error: true
+
+# ======================== 账号解绑 ========================
+
+- id: TC-USER-024
+  summary: 解绑已绑定的邮箱
+  tag: unbind
+  priority: P1
+  method: PUT
+  path: /v1/user/unbind
+  auth: user
+  json:
+    type: 101
+  expected:
+    status_code: 201
+
+- id: TC-USER-025
+  summary: 解绑不存在的账号
+  tag: unbind
+  priority: P1
+  method: PUT
+  path: /v1/user/unbind
+  auth: user
+  json:
+    type: 101
+  expected:
+    error: true
+
+# ======================== 注销账号 ========================
+
+- id: TC-USER-026
+  summary: 注销当前账号
+  tag: delete_account
+  priority: P2
+  method: DELETE
+  path: /v1/user
+  auth: user
+  json: {}
+  expected:
+    status_code: 202
+
+# ======================== 删除后复用注册 ========================
+
+- id: TC-USER-027
+  summary: 用户名+手机号匹配已删除账号时复用
+  tag: register_reuse
+  priority: P1
+  method: POST
+  path: /v1/user
+  auth: none
+  json:
+    nickname: 普通用户
+    username: user
+    mobile: 19900000003
+    email: new@qq.com
+    password: 123456
+    confirm_password: 123456
+  expected:
+    status_code: 200
+
+- id: TC-USER-028
+  summary: 用户名+邮箱匹配已删除账号时复用
+  tag: register_reuse
+  priority: P1
+  method: POST
+  path: /v1/user
+  auth: none
+  json:
+    nickname: 普通用户
+    username: user
+    email: 111@qq.com
+    mobile: 10000000000
+    password: 123456
+    confirm_password: 123456
+  expected:
+    status_code: 200
