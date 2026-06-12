@@ -12,10 +12,11 @@
   - password        : 密码修改（TC-USER-006 ~ 013）
   - profile         : 资料修改（TC-USER-014 ~ 015）
   - profile_conflict: 资料重复校验（TC-USER-016 ~ 018）
-  - bind            : 账号绑定（TC-USER-020 ~ 023）
-  - unbind          : 账号解绑（TC-USER-024 ~ 025）
-  - delete_account  : 注销账号（TC-USER-026）
-  - register_reuse  : 删除后复用注册（TC-USER-027 ~ 028）
+  
+  - unbind          : 账号解绑（TC-USER-019 ~ 021）
+  - bind            : 账号绑定（TC-USER-022 ~ 027）
+  - delete_account  : 注销账号（TC-USER-028）
+  - register_reuse  : 删除后复用注册（TC-USER-029 ~ 030）
 
 运行方式：
   pytest tests/api/test_user_cases.py -v              # 全量运行
@@ -79,6 +80,14 @@ BIND_CASES = _filter_by_tag(ALL_CASES, "bind")
 UNBIND_CASES = _filter_by_tag(ALL_CASES, "unbind")
 DELETE_ACCOUNT_CASES = _filter_by_tag(ALL_CASES, "delete_account")
 REGISTER_REUSE_CASES = _filter_by_tag(ALL_CASES, "register_reuse")
+
+
+REUSE_SEED = {
+    "username": "user",
+    "mobile": "19900000003",
+    "email": "111@qq.com",
+    "password": "123456",
+}
 
 
 @pytest.fixture(scope="module")
@@ -281,13 +290,19 @@ def _reset_password(client: ApiClient, tokens: Dict[str, str], user: str, old_pw
     tokens[user] = token
 
 
-def _rebind_user_account(client: ApiClient, tokens: Dict[str, str], case: dict):
-    """将 TC-USER-024 解绑的邮箱重新绑定回去。"""
-    user_client = _get_auth_client(client, tokens, case.get("auth", "none"))
-    user_client.request("PUT", "/v1/user/bind", json={
-        "account": "111@qq.com",
-        "type": 101,
+def _ensure_reuse_seed_deleted(client: ApiClient):
+    """确保复用测试的种子账号处于已删除状态。"""
+    temp_client = ApiClient(base_url=client.base_url, timeout=client.timeout, token=None)
+    token_resp = temp_client.request("POST", "/v1/token", json={
+        "account": REUSE_SEED["username"],
+        "secret": REUSE_SEED["password"],
+        "type": 100,
     })
+    token = _extract_token(token_resp.json())
+    if not token:
+        return
+    auth_client = ApiClient(base_url=client.base_url, timeout=client.timeout, token=token)
+    auth_client.request("DELETE", "/v1/user")
 
 
 def _delete_reused_account(client: ApiClient, case: dict):
@@ -296,7 +311,6 @@ def _delete_reused_account(client: ApiClient, case: dict):
     if auth != "none":
         return
     temp_client = ApiClient(base_url=client.base_url, timeout=client.timeout, token=None)
-    # 复用注册后重新删除，恢复到可复用前状态
     token_resp = temp_client.request("POST", "/v1/token", json={
         "account": case["json"]["username"],
         "secret": case["json"]["password"],
@@ -350,28 +364,11 @@ def test_profile_conflict(client: ApiClient, tokens: Dict[str, str], case: dict)
         _assert_error_response(case, resp, body)
 
 
-# ===========================================================================
-# 账号绑定 (TC-USER-020 ~ TC-USER-023)
-# ===========================================================================
 
-@pytest.mark.user
-@pytest.mark.parametrize(
-    "case",
-    BIND_CASES,
-    ids=[c["id"] for c in BIND_CASES],
-)
-def test_account_bind(client: ApiClient, tokens: Dict[str, str], case: dict):
-    """账号绑定：验证重复绑定和已占用账号的错误处理"""
-    resp = _execute_case(client, tokens, case)
-    expected = case.get("expected", {})
-    body = resp.json()
-
-    if expected.get("error"):
-        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
-# 账号解绑 (TC-USER-024 ~ TC-USER-025)
+# 账号解绑 (TC-USER-020 ~ TC-USER-023)
 # ===========================================================================
 
 @pytest.mark.user
@@ -394,12 +391,28 @@ def test_account_unbind(client: ApiClient, tokens: Dict[str, str], case: dict):
                 f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
             )
 
-    if case["id"] == "TC-USER-024" and resp.status_code in (200, 201):
-        _rebind_user_account(client, tokens, case)
+# ===========================================================================
+# 账号绑定 (TC-USER-024 ~ TC-USER-027)
+# ===========================================================================
+
+@pytest.mark.user
+@pytest.mark.parametrize(
+    "case",
+    BIND_CASES,
+    ids=[c["id"] for c in BIND_CASES],
+)
+def test_account_bind(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """账号绑定：验证重复绑定和已占用账号的错误处理"""
+    resp = _execute_case(client, tokens, case)
+    expected = case.get("expected", {})
+    body = resp.json()
+
+    if expected.get("error"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
-# 注销账号 (TC-USER-026)
+# 注销账号 (TC-USER-028)
 # ===========================================================================
 
 @pytest.mark.user
@@ -412,8 +425,9 @@ def test_account_unbind(client: ApiClient, tokens: Dict[str, str], case: dict):
 def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
     """
     注销账号：验证账号删除功能。
-    警告：此测试会真正删除 user 账号，运行后需重新执行 fake.py 恢复数据。
+    警告：此测试会真正删除 user 账号，执行前先重新初始化测试数据。
     """
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[2] / "fake.py")], check=True)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -424,7 +438,7 @@ def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 删除后复用注册 (TC-USER-027 ~ TC-USER-028)
+# 删除后复用注册 (TC-USER-029 ~ TC-USER-030)
 # ===========================================================================
 
 @pytest.mark.user
@@ -436,6 +450,7 @@ def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_register_reuse(client: ApiClient, case: dict):
     """删除后复用注册：验证用户名+手机号/邮箱命中已删除账号时可复用。"""
+    _ensure_reuse_seed_deleted(client)
     resp = client.request(
         method=case.get("method", "POST"),
         path=case.get("path", "/v1/user"),

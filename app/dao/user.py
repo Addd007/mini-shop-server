@@ -106,7 +106,7 @@ class UserDao():
 
                 current_identities = db.session.query(Identity).filter(Identity.user_id == reuse_user.id).all()
                 identity_map = {item.type: item for item in current_identities}
-                credential = form.password
+                password = form.password
 
                 for identity_type, identifier, verified in [
                     (ClientTypeEnum.USERNAME.value, username, 1),
@@ -122,10 +122,10 @@ class UserDao():
                     identity = identity_map.get(identity_type)
                     if identity:
                         identity.delete_time = None
-                        identity.update(commit=False, identifier=identifier, credential=credential)
+                        identity.update(commit=False, identifier=identifier, password=password)
                     else:
                         Identity.create(commit=False, user_id=reuse_user.id, type=identity_type,
-                                        verified=verified, identifier=identifier, password=credential)
+                                        verified=verified, identifier=identifier, password=password)
                 return reuse_user
 
             user = User.create(

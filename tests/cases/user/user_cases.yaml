@@ -149,8 +149,8 @@
   auth: user
   json:
     old_password: "123456"
-    new_password: "Abc123_Abc123_Abc1234"
-    confirm_password: "Abc123_Abc123_Abc1234"
+    new_password: "Abc1234_Abc1234_Abc1234"
+    confirm_password: "Abc1234_Abc1234_Abc1234"
   expected:
     status_code: 400
 
@@ -251,9 +251,74 @@
   expected:
     error: true
 
-# ======================== 账号绑定 ========================
+# ======================== 账号解绑 ========================
+
+
+- id: TC-USER-019
+  summary: 解绑已绑定的邮箱
+  tag: unbind
+  priority: P1
+  method: PUT
+  path: /v1/user/unbind
+  auth: user
+  json:
+    type: 101
+  expected:
+    status_code: 201
 
 - id: TC-USER-020
+  summary: 解绑已绑定的手机号
+  tag: unbind
+  priority: P1
+  method: PUT
+  path: /v1/user/unbind
+  auth: user
+  json:
+    type: 102
+  expected:
+    status_code: 201
+
+- id: TC-USER-021
+  summary: 解绑不存在的账号
+  tag: unbind
+  priority: P1
+  method: PUT
+  path: /v1/user/unbind
+  auth: user
+  json:
+    type: 102
+  expected:
+    error: true
+
+# ======================== 账号绑定 ========================
+
+- id: TC-USER-022
+  summary: 绑定未占用邮箱成功
+  tag: bind
+  priority: P1
+  method: PUT
+  path: /v1/user/bind
+  auth: user
+  json:
+    account: "111@qq.com"
+    type: 101
+  expected:
+    status_code: 201
+
+- id: TC-USER-023
+  summary: 绑定未占用手机号成功
+  tag: bind
+  priority: P1
+  method: PUT
+  path: /v1/user/bind
+  auth: user
+  json:
+    account: "19900000003"
+    type: 102
+  expected:
+    status_code: 201
+
+- id: TC-USER-024
   summary: 已绑定邮箱时再次绑定邮箱失败
   tag: bind
   priority: P1
@@ -261,12 +326,12 @@
   path: /v1/user/bind
   auth: user
   json:
-    account: "another_email@qq.com"
+    account: "111@qq.com"
     type: 101
   expected:
     error: true
 
-- id: TC-USER-021
+- id: TC-USER-025
   summary: 已绑定手机号时再次绑定手机号失败
   tag: bind
   priority: P1
@@ -274,12 +339,12 @@
   path: /v1/user/bind
   auth: user
   json:
-    account: "19900000009"
+    account: "19900000003"
     type: 102
   expected:
     error: true
 
-- id: TC-USER-022
+- id: TC-USER-026
   summary: 绑定其他用户已占用邮箱失败
   tag: bind
   priority: P1
@@ -292,7 +357,7 @@
   expected:
     error: true
 
-- id: TC-USER-023
+- id: TC-USER-027
   summary: 绑定其他用户已占用手机号失败
   tag: bind
   priority: P1
@@ -305,35 +370,9 @@
   expected:
     error: true
 
-# ======================== 账号解绑 ========================
-
-- id: TC-USER-024
-  summary: 解绑已绑定的邮箱
-  tag: unbind
-  priority: P1
-  method: PUT
-  path: /v1/user/unbind
-  auth: user
-  json:
-    type: 101
-  expected:
-    status_code: 201
-
-- id: TC-USER-025
-  summary: 解绑不存在的账号
-  tag: unbind
-  priority: P1
-  method: PUT
-  path: /v1/user/unbind
-  auth: user
-  json:
-    type: 101
-  expected:
-    error: true
-
 # ======================== 注销账号 ========================
 
-- id: TC-USER-026
+- id: TC-USER-028
   summary: 注销当前账号
   tag: delete_account
   priority: P2
@@ -346,7 +385,7 @@
 
 # ======================== 删除后复用注册 ========================
 
-- id: TC-USER-027
+- id: TC-USER-029
   summary: 用户名+手机号匹配已删除账号时复用
   tag: register_reuse
   priority: P1
@@ -363,7 +402,7 @@
   expected:
     status_code: 200
 
-- id: TC-USER-028
+- id: TC-USER-030
   summary: 用户名+邮箱匹配已删除账号时复用
   tag: register_reuse
   priority: P1
