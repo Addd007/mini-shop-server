@@ -8,7 +8,7 @@ from flask import current_app
 from app.core.db import db
 from app.libs.enums import AtLeastEnum, ClientTypeEnum
 from app.models.identity import Identity
-from app.libs.error_code import AtLeastOneClientException
+from app.libs.error_code import AtLeastOneClientException, RepeatException
 
 __author__ = 'Allen7D'
 
@@ -17,14 +17,28 @@ class IdentityDao():
     # 绑定用户
     @staticmethod
     def bind(user_id, identifier, type):
+        client_type = ClientTypeEnum(type)
+        type_msg = {
+            ClientTypeEnum.USERNAME: '用户名',
+            ClientTypeEnum.EMAIL: '邮箱',
+            ClientTypeEnum.MOBILE: '手机号'
+        }.get(client_type, '账号')
+        existed_identity = Identity.get(identifier=identifier)
+        if existed_identity:
+            if existed_identity.user_id == user_id and existed_identity.type == client_type.value:
+                raise RepeatException(msg='当前用户已绑定该{0}'.format(type_msg))
+            raise RepeatException(msg='{0}已被使用，请重新输入新的{0}'.format(type_msg))
+        if Identity.get(user_id=user_id, type=client_type.value):
+            raise RepeatException(msg='当前用户已绑定{0}'.format(type_msg))
+
         credential = None
-        if ClientTypeEnum(type) in current_app.config['CLINET_INNER_TYPES']:
+        if client_type in current_app.config['CLINET_INNER_TYPES']:
             credential = IdentityDao.get_credential(user_id=user_id)
         IdentityDao.create_identity(
             user_id=user_id,
             identifier=identifier,
             credential=credential,
-            type=type)
+            type=client_type.value)
 
     # 解绑用户
     @staticmethod

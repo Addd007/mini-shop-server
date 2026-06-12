@@ -4,6 +4,7 @@
 """
 from app.core.db import db
 from app.libs.enums import ScopeEnum, ClientTypeEnum
+from app.libs.error_code import AuthFailed, UserException, RepeatException
 from app.models.user import User
 from app.models.identity import Identity
 from app.dao.identity import IdentityDao
@@ -15,18 +16,25 @@ class UserDao():
     # 更改密码
     @staticmethod
     def change_password(uid, old_password, new_password):
-        identity = Identity.get_or_404(user_id=uid)  # 找到一个
-        if identity.check_password(old_password):
-            identity_list = Identity.query.filter(
-                Identity.type.in_([
-                    ClientTypeEnum.USERNAME.value,
-                    ClientTypeEnum.EMAIL.value,
-                    ClientTypeEnum.MOBILE.value]),
-                Identity.user_id == uid
-            ).all()
-            with db.auto_commit():
-                for item in identity_list:
-                    item.update(commit=False, password=new_password)
+        identity_list = Identity.query.filter(
+            Identity.type.in_([
+                ClientTypeEnum.USERNAME.value,
+                ClientTypeEnum.EMAIL.value,
+                ClientTypeEnum.MOBILE.value]),
+            Identity.user_id == uid
+        ).all()
+        if not identity_list:
+            raise UserException(msg='当前用户没有可修改密码的登录方式')
+
+        password_identities = [item for item in identity_list if item.password]
+        if not password_identities:
+            raise UserException(msg='当前用户没有可修改密码的登录方式')
+        if not any(item.check_password(old_password) for item in password_identities):
+            raise AuthFailed(msg='密码错误')
+
+        with db.auto_commit():
+            for item in identity_list:
+                item.update(commit=False, password=new_password)
 
     # 重置密码
     @staticmethod
@@ -106,15 +114,30 @@ class UserDao():
             # 第2.1步: 获取用户信息
             user = User.query.filter_by(id=uid).first_or_404()
             credential = IdentityDao.get_credential(user_id=uid)
-            # 第2.2步: 修改用户昵称
+            # 第2.2步: 先校验身份标识是否被其他身份占用
+            for item in identity_infos:
+                current_identity = db.session.query(Identity).filter(
+                    Identity.user_id == uid,
+                    Identity.type == item['type'],
+                    Identity.delete_time == None
+                ).first()
+                existed_identity = db.session.query(Identity).filter(
+                    Identity.identifier == item['identifier']
+                ).first()
+                if existed_identity and (not current_identity or existed_identity.id != current_identity.id):
+                    raise RepeatException(msg=item['msg'])
+                item['current_identity'] = current_identity
+            # 第2.3步: 修改用户昵称
             if hasattr(form, 'nickname'):
                 user.update(commit=False, nickname=form.nickname)
-            # 第2.3步: 依次修改用户身份信息(用户名、手机号、邮箱)
+            # 第2.4步: 依次修改用户身份信息(用户名、手机号、邮箱)
             for item in identity_infos:
-                Identity.abort_repeat(identifier=item['identifier'], msg=item['msg'])
-                IdentityDao.update_identity(
-                    commit=False, user_id=uid, identifier=item['identifier'], credential=credential, type=item['type']
-                )
+                current_identity = item['current_identity']
+                if current_identity:
+                    current_identity.update(commit=False, identifier=item['identifier'], credential=credential)
+                else:
+                    Identity.create(commit=False, user_id=uid, type=item['type'],
+                                    identifier=item['identifier'], credential=credential)
 
     # 更新头像
     @staticmethod

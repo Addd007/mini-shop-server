@@ -100,7 +100,7 @@ class TokenValidator(BaseValidator):
 class CreatePasswordValidator(BaseValidator):
     password = PasswordField('新密码', validators=[
         DataRequired(message='新密码不可为空'),
-        Regexp(r'^[A-Za-z0-9_*&$#@]{6,22}$', message='密码长度必须在6~22位之间，包含字符、数字和 _ '),
+        Regexp(r'^[A-Za-z0-9_*&$#@]{6,22}$', message='密码长度必须在6~22位之间，仅支持字母、数字和 _*&$#@'),
         EqualTo('confirm_password', message='两次输入的密码不一致，请输入相同的密码')
     ])
     confirm_password = PasswordField('确认新密码', validators=[DataRequired(message='请确认密码')])
@@ -110,7 +110,7 @@ class CreatePasswordValidator(BaseValidator):
 class ResetPasswordValidator(BaseValidator):
     new_password = PasswordField('新密码', validators=[
         DataRequired(message='新密码不可为空'),
-        Regexp(r'^[A-Za-z0-9_*&$#@]{6,22}$', message='密码长度必须在6~22位之间，包含字符、数字和 _ '),
+        Regexp(r'^[A-Za-z0-9_*&$#@]{6,22}$', message='密码长度必须在6~22位之间，仅支持字母、数字和 _*&$#@'),
         EqualTo('confirm_password', message='两次输入的密码不一致，请输入相同的密码')
     ])
     confirm_password = PasswordField('确认新密码', validators=[DataRequired(message='请确认密码')])
