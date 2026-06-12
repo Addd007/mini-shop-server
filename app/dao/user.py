@@ -155,8 +155,10 @@ class UserDao():
     @staticmethod
     def delete_user(uid):
         user = User.query.filter_by(id=uid).first_or_404()
+        identity_list = Identity.query.filter_by(user_id=user.id).all()
         with db.auto_commit():
-            Identity.query.filter_by(user_id=user.id).delete(commit=False)
+            for identity in identity_list:
+                identity.delete(commit=False)
             user.delete(commit=False)
 
     # 更换权限组
