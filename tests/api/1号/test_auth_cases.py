@@ -46,7 +46,7 @@ def _load_cases() -> list[dict[str, Any]]:
     CaseLoader 以 tests/ 目录为基准，传入相对路径。
     """
     loader = CaseLoader(Path(__file__).resolve().parents[1])
-    return loader.load(f"cases/auth/{CASE_FILE}")
+    return loader.load(f"cases/1号/{CASE_FILE}")
 
 
 def _filter_by_tag(cases: list[dict], tag: str) -> list[dict]:
