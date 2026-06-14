@@ -45,7 +45,7 @@ def _load_cases() -> list[dict[str, Any]]:
     从 YAML 文件加载全部测试用例。
     CaseLoader 以 tests/ 目录为基准，传入相对路径。
     """
-    loader = CaseLoader(Path(__file__).resolve().parents[1])
+    loader = CaseLoader(Path(__file__).resolve().parents[2])
     return loader.load(f"cases/1号/{CASE_FILE}")
 
 

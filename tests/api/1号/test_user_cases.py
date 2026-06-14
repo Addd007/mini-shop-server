@@ -19,8 +19,8 @@
   - register_reuse  : 删除后复用注册（TC-USER-029 ~ 030）
 
 运行方式：
-  pytest tests/api/test_user_cases.py -v              # 全量运行
-  pytest tests/api/test_user_cases.py -k TC-USER-001  # 按用例 ID 筛选
+  pytest tests/api/1号/test_user_cases.py -v              # 全量运行
+  pytest tests/api/1号/test_user_cases.py -k TC-USER-001  # 按用例 ID 筛选
   pytest -m user -v                                   # 按 marker 筛选
 """
 
@@ -38,19 +38,19 @@ from tests.common.api_client import ApiClient
 from tests.common.case_loader import CaseLoader
 
 
-CASE_FILE = "cases/user/user_cases.yaml"
+CASE_FILE = "cases/1号/user_cases.yaml"
 
 
 def _load_cases() -> list[dict[str, Any]]:
     """从 YAML 文件加载全部测试用例"""
-    loader = CaseLoader(Path(__file__).resolve().parents[1])
+    loader = CaseLoader(Path(__file__).resolve().parents[2])
     return loader.load(CASE_FILE)
 
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_test_data():
     """每轮测试前重建基础测试数据。"""
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[2] / "fake.py")], check=True)
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
 
 
 def _filter_by_tag(cases: list[dict], tag: str) -> list[dict]:
@@ -427,7 +427,7 @@ def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
     注销账号：验证账号删除功能。
     警告：此测试会真正删除 user 账号，执行前先重新初始化测试数据。
     """
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[2] / "fake.py")], check=True)
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
 
