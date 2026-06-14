@@ -1,0 +1,265 @@
+# 登录日志接口测试用例 - 基于 test_cases/1号/login_log.md
+# 覆盖：登录日志查询、详情、删除、清空
+
+# ======================== 登录日志列表 ========================
+
+- id: TC-LOGIN-001
+  summary: 查询登录日志列表成功
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 1
+    size: 10
+    start: "2026-01-01 00:00:00"
+    end: "2026-01-01 23:59:59"
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-002
+  summary: 登录日志列表仅传开始时间查询
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 1
+    size: 10
+    start: "2026-01-01 00:00:00"
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-003
+  summary: 登录日志列表仅传结束时间查询
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 1
+    size: 10
+    end: "2026-01-01 23:59:59"
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-004
+  summary: 登录日志列表按时间范围无数据
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 1
+    size: 10
+    start: "2099-01-01 00:00:00"
+    end: "2099-01-02 00:00:00"
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-005
+  summary: 登录日志列表分页参数边界校验
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 0
+    size: 0
+  expected:
+    status_code: 400
+
+- id: TC-LOGIN-006
+  summary: 登录日志列表页码超范围查询
+  tag: login_log_list
+  priority: P2
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 9999
+    size: 10
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-007
+  summary: 登录日志列表未登录访问
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: none
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 401
+
+- id: TC-LOGIN-008
+  summary: 登录日志列表普通用户无权限访问
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: user
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 403
+
+- id: TC-LOGIN-009
+  summary: 登录日志列表非法时间格式校验
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: admin
+  params:
+    page: 1
+    size: 10
+    start: "2026-13-40"
+    end: "abc"
+  expected:
+    status_code: 400
+
+# ======================== 登录日志详情 ========================
+
+- id: TC-LOGIN-010
+  summary: 查询单条登录日志成功
+  tag: login_log_detail
+  priority: P1
+  method: GET
+  path: /cms/log/login/1
+  auth: admin
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-011
+  summary: 查询单条登录日志不存在失败
+  tag: login_log_detail
+  priority: P1
+  method: GET
+  path: /cms/log/login/9999
+  auth: admin
+  expected:
+    status_code: 404
+
+- id: TC-LOGIN-012
+  summary: 查询单条登录日志非法ID失败
+  tag: login_log_detail
+  priority: P1
+  method: GET
+  path: /cms/log/login/abc
+  auth: admin
+  expected:
+    status_code: 400
+
+- id: TC-LOGIN-013
+  summary: 未登录查询单条登录日志失败
+  tag: login_log_detail
+  priority: P1
+  method: GET
+  path: /cms/log/login/1
+  auth: none
+  expected:
+    status_code: 401
+
+- id: TC-LOGIN-014
+  summary: 无权限查询单条登录日志失败
+  tag: login_log_detail
+  priority: P1
+  method: GET
+  path: /cms/log/login/1
+  auth: user
+  expected:
+    status_code: 403
+
+# ======================== 登录日志删除 ========================
+
+- id: TC-LOGIN-015
+  summary: 删除登录日志成功
+  tag: login_log_delete
+  priority: P2
+  method: DELETE
+  path: /cms/log/login/1
+  auth: admin
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-016
+  summary: 删除不存在的登录日志失败
+  tag: login_log_delete
+  priority: P1
+  method: DELETE
+  path: /cms/log/login/9999
+  auth: admin
+  expected:
+    status_code: 404
+
+- id: TC-LOGIN-017
+  summary: 删除登录日志非法ID失败
+  tag: login_log_delete
+  priority: P1
+  method: DELETE
+  path: /cms/log/login/abc
+  auth: admin
+  expected:
+    status_code: 400
+
+- id: TC-LOGIN-018
+  summary: 未登录删除登录日志失败
+  tag: login_log_delete
+  priority: P1
+  method: DELETE
+  path: /cms/log/login/1
+  auth: none
+  expected:
+    status_code: 401
+
+- id: TC-LOGIN-019
+  summary: 无权限删除登录日志失败
+  tag: login_log_delete
+  priority: P1
+  method: DELETE
+  path: /cms/log/login/1
+  auth: user
+  expected:
+    status_code: 403
+
+# ======================== 登录日志清空 ========================
+
+- id: TC-LOGIN-020
+  summary: 删除所有登录日志成功
+  tag: login_log_clear
+  priority: P2
+  method: DELETE
+  path: /cms/log/login/all
+  auth: admin
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-021
+  summary: 未登录清空登录日志失败
+  tag: login_log_clear
+  priority: P1
+  method: DELETE
+  path: /cms/log/login/all
+  auth: none
+  expected:
+    status_code: 401
+
+- id: TC-LOGIN-022
+  summary: 无权限清空登录日志失败
+  tag: login_log_clear
+  priority: P1
+  method: DELETE
+  path: /cms/log/login/all
+  auth: user
+  expected:
+    status_code: 403
