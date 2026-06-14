@@ -4,6 +4,8 @@
   参数校验
 """
 
+from datetime import datetime
+
 from flask import request
 from wtforms import BooleanField, StringField, IntegerField, PasswordField, FileField, FieldList
 from wtforms.validators import DataRequired, ValidationError, length, Email, Regexp, EqualTo, Optional, \
@@ -67,14 +69,40 @@ class PaginateValidator(BaseValidator):
 
 
 class TimeIntervalValidator(BaseValidator):
-    start = StringField(validators=[Optional(), length(min=10, max=10, message='时间戳长度必须为10')])
-    end = StringField(validators=[Optional(), length(min=10, max=10, message='时间戳长度必须为10')])
+    start = StringField(validators=[Optional()])
+    end = StringField(validators=[Optional()])
 
-    def validate_start(self, value):
-        self.start.data = int(value.data) if value.data else None
+    def validate(self):
+        valid = super(TimeIntervalValidator, self).validate()
+        if not valid:
+            return False
 
-    def validate_end(self, value):
-        self.end.data = int(value.data) if value.data else None
+        self.start.data = self._normalize_time(self.start.data, field_name='start')
+        self.end.data = self._normalize_time(self.end.data, field_name='end')
+        return True
+
+    @staticmethod
+    def _normalize_time(value, field_name='time'):
+        if value in (None, ''):
+            return None
+
+        value = str(value).strip()
+
+        # 兼容时间戳（10 位秒级 / 13 位毫秒级）
+        if value.isdigit():
+            if len(value) == 10:
+                return int(value)
+            if len(value) == 13:
+                return int(value) // 1000
+            raise ValidationError(message=f'{field_name} 时间戳格式不正确')
+
+        # 兼容日期与日期时间格式
+        for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+            try:
+                return int(datetime.strptime(value, fmt).timestamp())
+            except ValueError:
+                continue
+        raise ValidationError(message=f'{field_name} 时间格式不正确')
 
 
 ########## 登录相关 ##########

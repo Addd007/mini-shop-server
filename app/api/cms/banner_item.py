@@ -7,17 +7,28 @@ from app.extensions.api_docs.redprint import Redprint
 from app.extensions.api_docs.cms import banner_item as api_doc
 from app.core.token_auth import auth
 from app.models.banner_item import BannerItem
-from app.libs.error_code import Success, BannerException
+from app.libs.error_code import Success, BannerException, ParameterException
 
 __author__ = 'Allen7D'
 
 api = Redprint(name='banner_item', module='轮播子图管理', api_doc=api_doc, alias='cms_banner_item')
 
 
-@api.route('/<int:id>', methods=['GET'])
+def _parse_positive_id(value):
+    try:
+        parsed_id = int(str(value).strip())
+    except (TypeError, ValueError):
+        raise ParameterException(msg='ID 必须为正整数')
+    if parsed_id <= 0:
+        raise ParameterException(msg='ID 必须为正整数')
+    return parsed_id
+
+
+@api.route('/<id>', methods=['GET'])
 @api.doc(args=['g.path.banner_item_id'])
 def get_banner_item(id):
     '''查询轮播子图'''
+    id = _parse_positive_id(id)
     banner_item = BannerItem.query.filter_by(id=id).first_or_404(e=BannerException)
     return Success(banner_item)
 
@@ -31,21 +42,23 @@ def create_banner_item():
     return Success(error_code=1)
 
 
-@api.route('/<int:id>', methods=['PUT'])
+@api.route('/<id>', methods=['PUT'])
 @api.route_meta(auth='更新字典数据', module='字典数据')
 @api.doc(args=['g.path.banner_item_id'], auth=True)
 @auth.group_required
 def update_banner_item(id):
     '''更新轮播子图'''
+    _parse_positive_id(id)
     return Success(error_code=1)
 
 
-@api.route('/<int:id>', methods=['POST'])
+@api.route('/<id>', methods=['POST'])
 @api.route_meta(auth='删除轮播子图', module='轮播子图')
 @api.doc(args=['g.path.banner_item_id'])
 @auth.group_required
 def delete_banner_item(id):
     '''删除轮播子图'''
+    id = _parse_positive_id(id)
     banner_item = BannerItem.get_or_404(id=id)
     banner_item.delete()
     return Success(error_code=2)

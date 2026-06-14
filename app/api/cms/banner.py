@@ -9,11 +9,21 @@ from app.core.token_auth import auth
 from app.core.utils import paginate
 from app.models.banner import Banner
 from app.dao.banner import BannerDao
-from app.libs.error_code import Success, BannerException
+from app.libs.error_code import Success, BannerException, ParameterException
 
 __author__ = 'Allen7D'
 
 api = Redprint(name='banner', module='轮播图管理', api_doc=api_doc, alias='cms_banner')
+
+
+def _parse_positive_id(value):
+    try:
+        parsed_id = int(str(value).strip())
+    except (TypeError, ValueError):
+        raise ParameterException(msg='ID 必须为正整数')
+    if parsed_id <= 0:
+        raise ParameterException(msg='ID 必须为正整数')
+    return parsed_id
 
 
 @api.route('/list', methods=['GET'])
@@ -27,9 +37,10 @@ def get_banner_list():
     return Success(banner_list)
 
 
-@api.route('/<int:id>', methods=['GET'])
+@api.route('/<id>', methods=['GET'])
 @api.doc(args=['g.path.banner_id'])
 def get_banner(id):
     '''查询轮播图'''
+    id = _parse_positive_id(id)
     banner = Banner.query.filter_by(id=id).first_or_404(e=BannerException)
     return Success(banner)

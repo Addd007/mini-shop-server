@@ -4,17 +4,47 @@
 # ======================== 登录日志列表 ========================
 
 - id: TC-LOGIN-001
-  summary: 查询登录日志列表成功
+  summary: 查询登录日志列表成功（日期时间格式）
   tag: login_log_list
   priority: P1
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 1
     size: 10
-    start: "2026-01-01 00:00:00"
-    end: "2026-01-01 23:59:59"
+    start: "2026-06-14 00:00:00"
+    end: "2026-06-15 23:59:59"
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-001-01
+  summary: 查询登录日志列表成功（日期格式）
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+    start: "2026-06-14"
+    end: "2026-06-30"
+  expected:
+    status_code: 200
+
+- id: TC-LOGIN-001-02
+  summary: 查询登录日志列表成功（时间戳格式）
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+    start: 1718323200
+    end: 1728409599
   expected:
     status_code: 200
 
@@ -24,11 +54,11 @@
   priority: P1
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 1
     size: 10
-    start: "2026-01-01 00:00:00"
+    start: "2026-06-01 00:00:00"
   expected:
     status_code: 200
 
@@ -38,11 +68,11 @@
   priority: P1
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 1
     size: 10
-    end: "2026-01-01 23:59:59"
+    end: "2026-08-01 23:59:59"
   expected:
     status_code: 200
 
@@ -52,7 +82,7 @@
   priority: P1
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 1
     size: 10
@@ -67,7 +97,7 @@
   priority: P1
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 0
     size: 0
@@ -80,12 +110,12 @@
   priority: P2
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 9999
     size: 10
   expected:
-    status_code: 200
+    status_code: 404
 
 - id: TC-LOGIN-007
   summary: 登录日志列表未登录访问
@@ -111,7 +141,7 @@
     page: 1
     size: 10
   expected:
-    status_code: 403
+    status_code: 401
 
 - id: TC-LOGIN-009
   summary: 登录日志列表非法时间格式校验
@@ -119,12 +149,27 @@
   priority: P1
   method: GET
   path: /cms/log/login/list
-  auth: admin
+  auth: super
   params:
     page: 1
     size: 10
     start: "2026-13-40"
     end: "abc"
+  expected:
+    status_code: 400
+
+- id: TC-LOGIN-009-01
+  summary: 登录日志列表非法时间戳格式校验
+  tag: login_log_list
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+    start: 123
+    end: 456789
   expected:
     status_code: 400
 
@@ -136,7 +181,7 @@
   priority: P1
   method: GET
   path: /cms/log/login/1
-  auth: admin
+  auth: super
   expected:
     status_code: 200
 
@@ -146,7 +191,7 @@
   priority: P1
   method: GET
   path: /cms/log/login/9999
-  auth: admin
+  auth: super
   expected:
     status_code: 404
 
@@ -156,7 +201,17 @@
   priority: P1
   method: GET
   path: /cms/log/login/abc
-  auth: admin
+  auth: super
+  expected:
+    status_code: 400
+
+- id: TC-LOGIN-012-01
+  summary: 查询单条登录日志非法ID包含空格失败
+  tag: login_log_detail
+  priority: P1
+  method: GET
+  path: /cms/log/login/ abc 
+  auth: super
   expected:
     status_code: 400
 
@@ -178,7 +233,7 @@
   path: /cms/log/login/1
   auth: user
   expected:
-    status_code: 403
+    status_code: 401
 
 # ======================== 登录日志删除 ========================
 
@@ -188,7 +243,7 @@
   priority: P2
   method: DELETE
   path: /cms/log/login/1
-  auth: admin
+  auth: super
   expected:
     status_code: 200
 
@@ -197,8 +252,8 @@
   tag: login_log_delete
   priority: P1
   method: DELETE
-  path: /cms/log/login/9999
-  auth: admin
+  path: /cms/log/login/999
+  auth: super
   expected:
     status_code: 404
 
@@ -208,7 +263,7 @@
   priority: P1
   method: DELETE
   path: /cms/log/login/abc
-  auth: admin
+  auth: super
   expected:
     status_code: 400
 
@@ -230,7 +285,7 @@
   path: /cms/log/login/1
   auth: user
   expected:
-    status_code: 403
+    status_code: 401
 
 # ======================== 登录日志清空 ========================
 
@@ -240,9 +295,9 @@
   priority: P2
   method: DELETE
   path: /cms/log/login/all
-  auth: admin
+  auth: super
   expected:
-    status_code: 200
+    status_code: 202
 
 - id: TC-LOGIN-021
   summary: 未登录清空登录日志失败
@@ -262,4 +317,4 @@
   path: /cms/log/login/all
   auth: user
   expected:
-    status_code: 403
+    status_code: 401

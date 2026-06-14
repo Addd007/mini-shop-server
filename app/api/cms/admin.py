@@ -12,12 +12,23 @@ from app.core.utils import paginate
 from app.dao.admin import AdminDao
 from app.models.user import User
 from app.dao.user import UserDao
-from app.libs.error_code import Success
+from app.libs.error_code import Success, ParameterException
 from app.validators.forms import ResetPasswordValidator, CreateAdminValidator
 
 __author__ = 'Allen7D'
 
 api = Redprint(name='admin', module='管理员管理', api_doc=api_doc, alias='cms_admin')
+
+
+def _parse_positive_id(value):
+    try:
+        parsed_id = int(str(value).strip())
+    except (TypeError, ValueError):
+        raise ParameterException(msg='ID 必须为正整数')
+    if parsed_id <= 0:
+        raise ParameterException(msg='ID 必须为正整数')
+    return parsed_id
+
 
 @api.route('/list', methods=['GET'])
 @api.route_meta(auth='查询管理员列表', module='管理员', mount=False)
@@ -43,27 +54,29 @@ def create_admin():
     return Success()
 
 
-@api.route('/<int:uid>', methods=['PUT'])
+@api.route('/<uid>', methods=['PUT'])
 @api.route_meta(auth='更新管理员', module='管理员', mount=False)
 @api.doc(auth=True)
 @auth.admin_required
 def update_admin(uid):
     '''更新管理员'''
+    uid = _parse_positive_id(uid)
     AdminDao.update_admin(uid)
     return Success(error_code=1)
 
 
-@api.route('/<int:uid>', methods=['GET'])
+@api.route('/<uid>', methods=['GET'])
 @api.route_meta(auth='删除管理员', module='管理员', mount=False)
 @api.doc(auth=True)
 @auth.admin_required
 def delete_admin(uid):
     '''删除管理员'''
+    uid = _parse_positive_id(uid)
     AdminDao.delete_admin(uid)
     return Success(error_code=2)
 
 
-@api.route('/password/<int:uid>', methods=['PUT'])
+@api.route('/password/<uid>', methods=['PUT'])
 @api.route_meta(auth='修改管理员密码', module='管理员', mount=False)
 @api.doc(args=['g.body.new_password', 'g.body.confirm_password'], auth=True)
 @auth.admin_required
@@ -74,19 +87,21 @@ def change_user_password(uid):
     return Success(error_code=1, msg='密码修改成功')
 
 
-@api.route('/active/<int:uid>', methods=['PUT'])
+@api.route('/active/<uid>', methods=['PUT'])
 @api.doc(args=['g.path.uid'], auth=True)
 @auth.admin_required
 def trans2active(uid):
     '''激活管理员'''
+    uid = _parse_positive_id(uid)
     user = User.get_or_404(id=uid)
     return Success(msg='操作成功')
 
 
-@api.route('/disable/<int:uid>', methods=['PUT'])
+@api.route('/disable/<uid>', methods=['PUT'])
 @api.doc(args=['g.path.uid'], auth=True)
 @auth.admin_required
 def trans2disable(uid):
     '''禁用管理员'''
+    uid = _parse_positive_id(uid)
     user = User.get_or_404(id=uid)
     return Success(msg='操作成功')

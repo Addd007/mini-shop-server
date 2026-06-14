@@ -35,7 +35,7 @@ CASE_FILE = "cases/1号/login_log.yaml"
 
 
 def _load_cases() -> list[dict[str, Any]]:
-    loader = CaseLoader(Path(__file__).resolve().parents[1])
+    loader = CaseLoader(Path(__file__).resolve().parents[2])
     return loader.load(CASE_FILE)
 
 
@@ -54,7 +54,7 @@ def _has_error(resp_json: dict) -> bool:
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_test_data():
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[2] / "fake.py")], check=True)
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
 
 
 ALL_CASES = _load_cases()
@@ -72,6 +72,7 @@ def client(base_url, timeout) -> ApiClient:
 @pytest.fixture(scope="module")
 def tokens(client: ApiClient) -> Dict[str, str]:
     accounts = [
+        ("super", "super", "123456"),
         ("admin", "admin", "123456"),
         ("user", "user", "123456"),
     ]

@@ -9,7 +9,7 @@ from flask import request
 from app.extensions.api_docs.redprint import Redprint
 from app.extensions.api_docs.cms import route as api_doc
 from app.core.token_auth import auth
-from app.libs.error_code import Success
+from app.libs.error_code import Success, ParameterException
 from app.dao.route import RouteDao
 from app.models.route import Route
 from app.validators.forms import RouteNodeValidator, RouteNodeWithoutIdValidator
@@ -17,6 +17,16 @@ from app.validators.forms import RouteNodeValidator, RouteNodeWithoutIdValidator
 __author__ = 'Mohan'
 
 api = Redprint(name='route', module='路由管理', api_doc=api_doc, alias='cms_route')
+
+
+def _parse_positive_id(value):
+    try:
+        parsed_id = int(str(value).strip())
+    except (TypeError, ValueError):
+        raise ParameterException(msg='ID 必须为正整数')
+    if parsed_id <= 0:
+        raise ParameterException(msg='ID 必须为正整数')
+    return parsed_id
 
 
 @api.route('/tree', methods=['GET'])
@@ -46,21 +56,23 @@ def update_route_tree():
     return Success()
 
 
-@api.route('/<int:id>', methods=['GET'])
+@api.route('/<id>', methods=['GET'])
 @api.doc(args=['path.route_id'], auth=True)
 @auth.admin_required
 def get_route_node(id):
     """按ID获取路由节点"""
+    id = _parse_positive_id(id)
     route_node = Route.get_or_404(id=id, msg='路由节点不存在')
     return Success(route_node)
 
 
-@api.route('/<int:id>', methods=['PUT'])
+@api.route('/<id>', methods=['PUT'])
 @api.doc(args=['path.route_id', 'body.route_id', 'body.parent_id', 'body.title',
                'body.name', 'body.icon', 'body.path', 'body.component', 'body.hidden'], auth=True)
 # @auth.admin_required
 def update_route_node(id):
     """按ID修改路由节点"""
+    _parse_positive_id(id)
     validator = RouteNodeValidator().dt_data # 包含对id的校验
     RouteDao.update(**validator)
     return Success()
@@ -71,6 +83,7 @@ def update_route_node(id):
 @auth.admin_required
 def delete_route_node_by_id(id):
     """按ID删除路由节点"""
+    id = _parse_positive_id(id)
     RouteDao.delete(id)
     return Success()
 
