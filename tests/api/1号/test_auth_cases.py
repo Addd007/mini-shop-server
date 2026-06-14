@@ -12,8 +12,8 @@
   - token_verify  : Token 校验接口（空/伪造/有效 Token），验证鉴权逻辑
 
 运行方式：
-  pytest tests/api/test_auth_cases.py -v           # 全量运行
-  pytest tests/api/test_auth_cases.py -k TC-AUTH-001  # 按用例 ID 筛选
+  pytest tests/api/1号/test_auth_cases.py -v           # 全量运行
+  pytest tests/api/1号/test_auth_cases.py -k TC-AUTH-001  # 按用例 ID 筛选
   pytest -m auth -v                                # 按 marker 筛选
 """
 
@@ -32,7 +32,7 @@ from tests.common.case_loader import CaseLoader
 # 常量：YAML 用例文件路径（相对于 tests/ 目录）
 # ---------------------------------------------------------------------------
 
-CASES_DIR = Path(__file__).resolve().parents[1] / "cases" / "auth"
+CASES_DIR = Path(__file__).resolve().parents[1] / "cases" / "1号"
 CASE_FILE = "auth_cases.yaml"
 
 
