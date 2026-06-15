@@ -467,6 +467,73 @@ stdout_logfile=/tmp/blog_stdout.log
 
 ## 使用
 
+### 测试环境准备
+```bash
+# 1. 安装测试依赖
+uv sync
+
+# 2. 激活虚拟环境（如果你要手动执行）
+source .venv/bin/activate
+
+# 3. 安装 Allure Pytest 插件（如依赖里未包含）
+python -m pip install allure-pytest
+```
+
+### 运行自动化测试
+```bash
+# 全量执行
+pytest
+
+# 只运行某个模块
+pytest tests/api/1号/test_product_cases.py -v
+pytest tests/api/1号/test_user_cases.py -v
+pytest tests/api/1号/test_login_log_cases.py -v
+pytest tests/api/1号/test_auth_cases.py -v
+
+# 按 marker 执行
+pytest -m auth
+pytest -m product
+pytest -m user
+pytest -m login_log
+
+# 生成 Allure 原始结果
+pytest --alluredir=allure-results
+```
+
+### 查看 Allure 报告
+```bash
+# 方式 1：直接生成并打开
+allure serve allure-results
+
+# 方式 2：先生成静态报告，再打开
+allure generate allure-results -o allure-report --clean
+allure open allure-report
+```
+
+### 常见问题
+```bash
+# 1. 如果 pytest 不识别 --alluredir
+#   说明未安装 allure-pytest
+python -m pip install allure-pytest
+
+# 2. 如果 python -m pip 不可用
+python -m ensurepip --upgrade
+
+# 3. 如果 allure 命令不存在
+#   需要单独安装 Allure CLI，例如 macOS 可使用 brew
+brew install allure
+```
+
+### 测试结构说明
+- `tests/conftest.py`：公共 fixture 配置
+- `tests/common/api_client.py`：接口请求封装
+- `tests/common/case_loader.py`：YAML 用例加载
+- `tests/common/allure_helper.py`：Allure 附件与标题辅助
+- `tests/api/1号/`：接口自动化测试用例
+
+
+## 后续
+
 ### 第一步: 
 
 ### 第二步:
