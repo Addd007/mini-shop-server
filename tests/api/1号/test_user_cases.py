@@ -32,8 +32,10 @@ from typing import Any, Dict, Optional
 import subprocess
 import sys
 
+import allure
 import pytest
 
+from tests.common.allure_helper import attach_request_response
 from tests.common.api_client import ApiClient
 from tests.common.case_loader import CaseLoader
 
@@ -164,6 +166,16 @@ def _assert_error_response(case: dict, resp, body: dict):
         )
 
 
+def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
+    allure.dynamic.title(f"用户接口 - {case['id']}")
+    allure.dynamic.feature("用户管理")
+    allure.dynamic.story(case.get("tag", "用户用例"))
+    resp = _execute_case(client, tokens, case)
+    body = resp.json()
+    attach_request_response({"case": case}, resp)
+    return resp, body
+
+
 # ===========================================================================
 # 用户信息查询 (TC-USER-001 ~ TC-USER-002)
 # ===========================================================================
@@ -176,22 +188,24 @@ def _assert_error_response(case: dict, resp, body: dict):
 )
 def test_user_info(client: ApiClient, tokens: Dict[str, str], case: dict):
     """用户信息查询：验证登录态和返回字段"""
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
 
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     else:
         if "status_code" in expected:
-            assert resp.status_code == expected["status_code"], (
-                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-            )
-        if "has_fields" in expected:
-            for field in expected["has_fields"]:
-                assert field in body or field in body.get("data", {}), (
-                    f"[{case['id']}] 响应缺少字段 {field}: {body}"
+            with allure.step("校验 HTTP 状态码"):
+                assert resp.status_code == expected["status_code"], (
+                    f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
                 )
+        if "has_fields" in expected:
+            with allure.step("校验响应字段"):
+                for field in expected["has_fields"]:
+                    assert field in body or field in body.get("data", {}), (
+                        f"[{case['id']}] 响应缺少字段 {field}: {body}"
+                    )
 
 
 # ===========================================================================

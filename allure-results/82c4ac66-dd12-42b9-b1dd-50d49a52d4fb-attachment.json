@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "TC-AUTH-016",
+    "summary": "用户名大小写不匹配登录失败",
+    "tag": "login_failure",
+    "priority": "P2",
+    "method": "POST",
+    "path": "/v1/token",
+    "json": {
+      "account": "Super",
+      "secret": "123456",
+      "type": 100
+    },
+    "expected": {
+      "has_token": false,
+      "error": true
+    }
+  },
+  "request_payload": {
+    "account": "Super",
+    "secret": "123456",
+    "type": 100
+  }
+}

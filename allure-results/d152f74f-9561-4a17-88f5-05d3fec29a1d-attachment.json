@@ -1,0 +1,15 @@
+{
+  "case": {
+    "id": "TC-PROD-018",
+    "summary": "非法商品ID删除失败",
+    "tag": "product_delete",
+    "priority": "P1",
+    "method": "DELETE",
+    "path": "/v1/product/-1",
+    "auth": "super",
+    "expected": {
+      "status_code": 400
+    }
+  },
+  "request_payload": null
+}

@@ -1,0 +1,22 @@
+{
+  "case": {
+    "id": "TC-PROD-023",
+    "summary": "图片顺序参数为空失败",
+    "tag": "product_reorder",
+    "priority": "P1",
+    "method": "PUT",
+    "path": "/v1/product/11/reorder",
+    "auth": "super",
+    "json": {
+      "src_order": 1,
+      "dest_order": ""
+    },
+    "expected": {
+      "status_code": 400
+    }
+  },
+  "request_payload": {
+    "src_order": 1,
+    "dest_order": ""
+  }
+}

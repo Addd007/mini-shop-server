@@ -23,12 +23,22 @@ from app.core.utils import paginate
 from app.service.order import OrderService
 from app.models.order import Order
 from app.dao.order import OrderDao
-from app.libs.error_code import Success
+from app.libs.error_code import Success, ParameterException
 from app.validators.forms import OrderPlaceValidator, OrderIDValidator
 
 __author__ = 'Allen7D'
 
 api = Redprint(name='order', module='订单', api_doc=api_doc)
+
+
+def _parse_positive_id(value):
+    try:
+        parsed_id = int(str(value).strip())
+    except (TypeError, ValueError):
+        raise ParameterException(msg='ID 必须为正整数')
+    if parsed_id <= 0:
+        raise ParameterException(msg='ID 必须为正整数')
+    return parsed_id
 
 
 @api.route('', methods=['POST'])
@@ -51,10 +61,11 @@ def get_order_list():
     return Success(paged_orders)
 
 
-@api.route('/<int:id>', methods=['GET'])
+@api.route('/<id>', methods=['GET'])
 @api.doc(args=['g.path.order_id'], auth=True)
 @auth.login_required
 def get_order(id):
     '''查询订单详情'''
+    id = _parse_positive_id(id)
     order = Order.query.get_or_404(id).hide('prepay_id')
     return Success(order)

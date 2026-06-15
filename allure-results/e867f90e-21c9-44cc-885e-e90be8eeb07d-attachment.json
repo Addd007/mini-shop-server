@@ -1,0 +1,19 @@
+{
+  "case": {
+    "id": "TC-USER-001",
+    "summary": "查询当前登录用户信息及字段完整性",
+    "tag": "user_info",
+    "priority": "P0",
+    "method": "GET",
+    "path": "/v1/user",
+    "auth": "super",
+    "json": {},
+    "expected": {
+      "status_code": 200,
+      "has_fields": [
+        "nickname",
+        "auth"
+      ]
+    }
+  }
+}

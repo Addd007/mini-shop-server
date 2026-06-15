@@ -1,0 +1,14 @@
+{
+  "case": {
+    "id": "TC-LOGIN-021",
+    "summary": "未登录清空登录日志失败",
+    "tag": "login_log_clear",
+    "priority": "P1",
+    "method": "DELETE",
+    "path": "/cms/log/login/all",
+    "auth": "none",
+    "expected": {
+      "status_code": 401
+    }
+  }
+}

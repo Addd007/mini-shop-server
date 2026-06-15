@@ -26,8 +26,8 @@ create table address
         unique (user_id)
 );
 
-INSERT INTO zerd.address (id, name, mobile, province, city, country, detail, user_id, create_time, update_time, delete_time) VALUES (1, '巴拿巴', '13799999999', '浙江', '杭州', '滨江', '塞浦路斯9栋7单元101室', 1, null, null, null);
-INSERT INTO zerd.address (id, name, mobile, province, city, country, detail, user_id, create_time, update_time, delete_time) VALUES (2, '扫罗', '13788888888', '浙江', '杭州', '萧山', '大马士革7栋1单元701室', 3, null, null, null);
+INSERT INTO zerd.address (id, name, mobile, province, city, country, detail, user_id, create_time, update_time, delete_time) VALUES (1, '巴拿巴', '19900000001', '浙江', '杭州', '滨江', '塞浦路斯9栋7单元101室', 1, null, null, null);
+INSERT INTO zerd.address (id, name, mobile, province, city, country, detail, user_id, create_time, update_time, delete_time) VALUES (2, '扫罗', '19900000003', '浙江', '杭州', '萧山', '大马士革7栋1单元701室', 3, null, null, null);
 create table article
 (
     id          int auto_increment

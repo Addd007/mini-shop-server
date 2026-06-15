@@ -1,0 +1,14 @@
+{
+  "case": {
+    "id": "TC-LOGIN-019",
+    "summary": "无权限删除登录日志失败",
+    "tag": "login_log_delete",
+    "priority": "P1",
+    "method": "DELETE",
+    "path": "/cms/log/login/1",
+    "auth": "user",
+    "expected": {
+      "status_code": 401
+    }
+  }
+}

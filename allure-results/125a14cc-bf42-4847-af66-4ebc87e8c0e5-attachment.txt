@@ -1,0 +1,1 @@
+{"data": {"category_id": 2, "id": 2, "images": [], "main_image": "http://127.0.0.1:5000/static/images/product-dryfruit@1.png", "name": "\u68a8\u82b1\u5e26\u96e8 3\u4e2a", "price": 0.01, "stock": 984, "summary": null}, "error_code": 1, "msg": "\u521b\u5efa | \u66f4\u65b0\u6210\u529f"}

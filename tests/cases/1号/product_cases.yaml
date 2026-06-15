@@ -1,0 +1,271 @@
+# 商品接口测试用例 - 基于 test_cases/1号/product.md
+# 覆盖：商品列表、商品详情、最近商品、商品新增、商品更新、商品删除、商品图片排序、分类商品查询
+
+# ======================== 最近商品 ========================
+
+- id: TC-PROD-001
+  summary: 最近商品查询成功
+  tag: product_recent
+  priority: P0
+  method: GET
+  path: /v1/product/recent
+  auth: none
+  params:
+    count: 5
+  expected:
+    status_code: 200
+
+- id: TC-PROD-002
+  summary: 最近商品数量参数校验失败
+  tag: product_recent
+  priority: P1
+  method: GET
+  path: /v1/product/recent
+  auth: none
+  params:
+    count: 0
+  expected:
+    status_code: 400
+
+# ======================== 商品详情 ========================
+
+- id: TC-PROD-003
+  summary: 商品详情查询成功
+  tag: product_detail
+  priority: P0
+  method: GET
+  path: /v1/product/1
+  auth: none
+  expected:
+    status_code: 200
+
+- id: TC-PROD-004
+  summary: 非法商品ID返回格式错误
+  tag: product_detail
+  priority: P1
+  method: GET
+  path: /v1/product/abc
+  auth: none
+  expected:
+    status_code: 400
+
+- id: TC-PROD-005
+  summary: 商品ID不存在返回404
+  tag: product_detail
+  priority: P1
+  method: GET
+  path: /v1/product/9999
+  auth: none
+  expected:
+    status_code: 404
+
+# ======================== 分类商品查询 ========================
+
+- id: TC-PROD-006
+  summary: 按分类查询商品列表成功
+  tag: product_list_category
+  priority: P0
+  method: GET
+  path: /v1/product/list/by_category
+  auth: user
+  params:
+    category_id: 1
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: TC-PROD-007
+  summary: 分类商品列表参数校验失败
+  tag: product_list_category
+  priority: P1
+  method: GET
+  path: /v1/product/list/by_category
+  auth: user
+  params:
+    category_id: abc
+    page: 1
+    size: 10
+  expected:
+    status_code: 400
+
+- id: TC-PROD-008
+  summary: 分类商品列表未登录访问失败
+  tag: product_list_category
+  priority: P1
+  method: GET
+  path: /v1/product/list/by_category
+  auth: none
+  params:
+    category_id: 1
+    page: 1
+    size: 10
+  expected:
+    status_code: 401
+
+- id: TC-PROD-009
+  summary: 分类商品列表页码边界校验失败
+  tag: product_list_category
+  priority: P1
+  method: GET
+  path: /v1/product/list/by_category
+  auth: user
+  params:
+    category_id: 1
+    page: 0
+    size: 10
+  expected:
+    status_code: 400
+
+- id: TC-PROD-010
+  summary: 分类商品列表页大小边界校验失败
+  tag: product_list_category
+  priority: P1
+  method: GET
+  path: /v1/product/list/by_category
+  auth: user
+  params:
+    category_id: 1
+    page: 1
+    size: 0
+  expected:
+    status_code: 400
+
+- id: TC-PROD-011
+  summary: 查询分类下所有商品成功
+  tag: product_all_category
+  priority: P1
+  method: GET
+  path: /v1/product/all/by_category
+  auth: none
+  params:
+    category_id: 1
+  expected:
+    status_code: 200
+
+# ======================== 商品新增 ========================
+
+- id: TC-PROD-012
+  summary: 新增商品成功
+  tag: product_create
+  priority: P0
+  method: POST
+  path: /v1/product
+  auth: super
+  json:
+    name: 新商品
+    category_id: 1
+  expected:
+    status_code: 201
+
+# ======================== 商品更新 ========================
+
+- id: TC-PROD-013
+  summary: 更新商品信息成功
+  tag: product_update
+  priority: P1
+  method: PUT
+  path: /v1/product/2
+  auth: super
+  json:
+    name: 更新商品
+  expected:
+    status_code: 201
+
+- id: TC-PROD-014
+  summary: 非法商品ID更新失败
+  tag: product_update
+  priority: P1
+  method: PUT
+  path: /v1/product/0
+  auth: super
+  json:
+    name: 更新商品
+  expected:
+    status_code: 400
+
+# ======================== 商品删除 ========================
+
+- id: TC-PROD-017
+  summary: 删除商品成功
+  tag: product_delete
+  priority: P1
+  method: DELETE
+  path: /v1/product/33
+  auth: super
+  expected:
+    status_code: 202
+
+- id: TC-PROD-018
+  summary: 非法商品ID删除失败
+  tag: product_delete
+  priority: P1
+  method: DELETE
+  path: /v1/product/-1
+  auth: super
+  expected:
+    status_code: 400
+
+- id: TC-PROD-019
+  summary: 商品删除未登录访问失败
+  tag: product_delete
+  priority: P1
+  method: DELETE
+  path: /v1/product/3
+  auth: none
+  expected:
+    status_code: 401
+
+# ======================== 商品图片排序 ========================
+
+- id: TC-PROD-020
+  summary: 商品图片顺序调整成功
+  tag: product_reorder
+  priority: P2
+  method: PUT
+  path: /v1/product/11/reorder
+  auth: super
+  json:
+    src_order: 1
+    dest_order: 2
+  expected:
+    status_code: 201
+
+- id: TC-PROD-021
+  summary: 非法商品ID排序失败
+  tag: product_reorder
+  priority: P1
+  method: PUT
+  path: /v1/product/abc/reorder
+  auth: super
+  json:
+    src_order: 1
+    dest_order: 2
+  expected:
+    status_code: 400
+
+- id: TC-PROD-022
+  summary: 图片顺序参数非法失败
+  tag: product_reorder
+  priority: P1
+  method: PUT
+  path: /v1/product/11/reorder
+  auth: super
+  json:
+    src_order: abc
+    dest_order: 2
+  expected:
+    status_code: 400
+
+- id: TC-PROD-023
+  summary: 图片顺序参数为空失败
+  tag: product_reorder
+  priority: P1
+  method: PUT
+  path: /v1/product/11/reorder
+  auth: super
+  json:
+    src_order: 1
+    dest_order: ""
+  expected:
+    status_code: 400

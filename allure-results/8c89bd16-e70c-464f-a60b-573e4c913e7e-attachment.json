@@ -1,0 +1,19 @@
+{
+  "case": {
+    "id": "TC-LOGIN-002",
+    "summary": "登录日志列表仅传开始时间查询",
+    "tag": "login_log_list",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/list",
+    "auth": "super",
+    "params": {
+      "page": 1,
+      "size": 10,
+      "start": "2026-06-01 00:00:00"
+    },
+    "expected": {
+      "status_code": 200
+    }
+  }
+}

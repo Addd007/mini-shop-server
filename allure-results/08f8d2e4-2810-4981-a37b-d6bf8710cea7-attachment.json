@@ -1,0 +1,15 @@
+{
+  "case": {
+    "id": "TC-PROD-019",
+    "summary": "商品删除未登录访问失败",
+    "tag": "product_delete",
+    "priority": "P1",
+    "method": "DELETE",
+    "path": "/v1/product/3",
+    "auth": "none",
+    "expected": {
+      "status_code": 401
+    }
+  },
+  "request_payload": null
+}

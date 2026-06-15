@@ -1,0 +1,20 @@
+{
+  "case": {
+    "id": "TC-LOGIN-004",
+    "summary": "登录日志列表按时间范围无数据",
+    "tag": "login_log_list",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/list",
+    "auth": "super",
+    "params": {
+      "page": 1,
+      "size": 10,
+      "start": "2099-01-01 00:00:00",
+      "end": "2099-01-02 00:00:00"
+    },
+    "expected": {
+      "status_code": 200
+    }
+  }
+}

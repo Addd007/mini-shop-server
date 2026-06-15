@@ -1,0 +1,14 @@
+{
+  "case": {
+    "id": "TC-LOGIN-010",
+    "summary": "查询单条登录日志成功",
+    "tag": "login_log_detail",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/1",
+    "auth": "super",
+    "expected": {
+      "status_code": 200
+    }
+  }
+}

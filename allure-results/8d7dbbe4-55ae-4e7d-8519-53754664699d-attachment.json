@@ -1,0 +1,20 @@
+{
+  "case": {
+    "id": "TC-LOGIN-001-02",
+    "summary": "查询登录日志列表成功（时间戳格式）",
+    "tag": "login_log_list",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/list",
+    "auth": "super",
+    "params": {
+      "page": 1,
+      "size": 10,
+      "start": 1718323200,
+      "end": 1728409599
+    },
+    "expected": {
+      "status_code": 200
+    }
+  }
+}

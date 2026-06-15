@@ -1,0 +1,18 @@
+{
+  "case": {
+    "id": "TC-LOGIN-008",
+    "summary": "登录日志列表普通用户无权限访问",
+    "tag": "login_log_list",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/list",
+    "auth": "user",
+    "params": {
+      "page": 1,
+      "size": 10
+    },
+    "expected": {
+      "status_code": 401
+    }
+  }
+}

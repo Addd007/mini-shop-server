@@ -22,8 +22,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Optional
 
+import allure
 import pytest
 
+from tests.common.allure_helper import attach_request_response
 from tests.common.api_client import ApiClient
 from tests.common.case_loader import CaseLoader
 
@@ -136,10 +138,8 @@ def _execute_case(client: ApiClient, case: dict, token: Optional[str] = None) ->
     返回：
       requests.Response 对象
     """
-    # 浅拷贝 json body，避免修改原始用例数据
     json_body = case.get("json", {}).copy()
 
-    # 替换占位符：YAML 中 token 字段值为 "{valid_token}" 时，替换为真实 token
     for key, val in json_body.items():
         if isinstance(val, str) and val == "{valid_token}" and token:
             json_body[key] = token
@@ -151,6 +151,11 @@ def _execute_case(client: ApiClient, case: dict, token: Optional[str] = None) ->
         headers=case.get("headers"),
         params=case.get("params"),
     )
+
+
+def _attach_case(case: dict, resp: Any, request_payload: Any = None) -> None:
+    payload = {"case": case, "request_payload": request_payload}
+    attach_request_response(payload, resp)
 
 
 # ===========================================================================
@@ -165,27 +170,24 @@ def _execute_case(client: ApiClient, case: dict, token: Optional[str] = None) ->
     ids=[c["id"] for c in LOGIN_SUCCESS_CASES],
 )
 def test_login_success(client: ApiClient, case: dict):
-    """
-    正常登录场景：用户名 / 邮箱 / 手机号登录均应成功。
-    断言：
-      1. HTTP 状态码 == YAML expected.status_code (200)
-      2. 响应 body 中包含非空 token
-    """
+    allure.dynamic.title(f"登录成功 - {case['id']}")
+    allure.dynamic.feature("登录与鉴权")
+    allure.dynamic.story("正常登录")
     resp = _execute_case(client, case)
     expected = case.get("expected", {})
-
-    # 断言 HTTP 状态码
-    if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
-
     body = resp.json()
+    _attach_case(case, resp, request_payload=case.get("json"))
 
-    # 断言响应中包含 token
+    if "status_code" in expected:
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
+
     if expected.get("has_token"):
-        token = _extract_token(body)
-        assert token, f"[{case['id']}] 响应中未包含 token: {body}"
+        with allure.step("校验返回 token"):
+            token = _extract_token(body)
+            assert token, f"[{case['id']}] 响应中未包含 token: {body}"
 
 
 # ===========================================================================
@@ -200,33 +202,29 @@ def test_login_success(client: ApiClient, case: dict):
     ids=[c["id"] for c in LOGIN_FAILURE_CASES],
 )
 def test_login_failure(client: ApiClient, case: dict):
-    """
-    异常登录场景：密码错误 / 账号不存在 / 类型无效 / 大小写不匹配。
-    断言：
-      1. 接口返回错误（HTTP 4xx 或 error_code != 0）
-      2. 响应中不包含 token
-    """
+    allure.dynamic.title(f"登录失败 - {case['id']}")
+    allure.dynamic.feature("登录与鉴权")
+    allure.dynamic.story("异常登录")
     resp = _execute_case(client, case)
     expected = case.get("expected", {})
     body = resp.json()
+    _attach_case(case, resp, request_payload=case.get("json"))
 
-    # 断言返回错误：兼容两种错误表示方式
     if expected.get("error"):
-        if resp.status_code == 200:
-            # 业务层面报错：HTTP 200 但 error_code 非零
-            assert _has_error(body), (
-                f"[{case['id']}] 业务应返回非零 error_code: {body}"
-            )
-        else:
-            # HTTP 层面报错：状态码为 4xx
-            assert resp.status_code in (400, 401, 403, 404, 422), (
-                f"[{case['id']}] 期望 4xx 状态码, 实际 {resp.status_code}"
-            )
+        with allure.step("校验接口返回错误"):
+            if resp.status_code == 200:
+                assert _has_error(body), (
+                    f"[{case['id']}] 业务应返回非零 error_code: {body}"
+                )
+            else:
+                assert resp.status_code in (400, 401, 403, 404, 422), (
+                    f"[{case['id']}] 期望 4xx 状态码, 实际 {resp.status_code}"
+                )
 
-    # 断言失败场景不应泄露 token
     if expected.get("has_token") is False:
-        token = _extract_token(body)
-        assert not token, f"[{case['id']}] 失败场景不应返回 token: {body}"
+        with allure.step("校验失败场景不返回 token"):
+            token = _extract_token(body)
+            assert not token, f"[{case['id']}] 失败场景不应返回 token: {body}"
 
 
 # ===========================================================================
@@ -241,31 +239,29 @@ def test_login_failure(client: ApiClient, case: dict):
     ids=[c["id"] for c in VALIDATION_CASES],
 )
 def test_param_validation(client: ApiClient, case: dict):
-    """
-    参数校验场景：空账号 / 空密码 / 缺少 type。
-    断言：
-      1. 接口返回校验错误（HTTP 400/422 或 error_code != 0）
-      2. 响应中不包含 token
-    """
+    allure.dynamic.title(f"参数校验 - {case['id']}")
+    allure.dynamic.feature("登录与鉴权")
+    allure.dynamic.story("参数校验")
     resp = _execute_case(client, case)
     expected = case.get("expected", {})
     body = resp.json()
+    _attach_case(case, resp, request_payload=case.get("json"))
 
-    # 断言参数校验失败
     if expected.get("error"):
-        if resp.status_code == 200:
-            assert _has_error(body), (
-                f"[{case['id']}] 参数校验应返回非零 error_code: {body}"
-            )
-        else:
-            assert resp.status_code in (400, 401, 422), (
-                f"[{case['id']}] 期望 400/401/422, 实际 {resp.status_code}"
-            )
+        with allure.step("校验参数错误响应"):
+            if resp.status_code == 200:
+                assert _has_error(body), (
+                    f"[{case['id']}] 参数校验应返回非零 error_code: {body}"
+                )
+            else:
+                assert resp.status_code in (400, 401, 422), (
+                    f"[{case['id']}] 期望 400/401/422, 实际 {resp.status_code}"
+                )
 
-    # 断言校验失败不返回 token
     if expected.get("has_token") is False:
-        token = _extract_token(body)
-        assert not token, f"[{case['id']}] 校验失败不应返回 token: {body}"
+        with allure.step("校验参数错误不返回 token"):
+            token = _extract_token(body)
+            assert not token, f"[{case['id']}] 校验失败不应返回 token: {body}"
 
 
 # ===========================================================================
@@ -280,23 +276,24 @@ def test_param_validation(client: ApiClient, case: dict):
     ids=[c["id"] for c in TOKEN_VERIFY_CASES if c["id"] != "TC-AUTH-023"],
 )
 def test_token_verify_failure(client: ApiClient, case: dict):
-    """
-    Token 校验失败场景：空 token / 伪造 token。
-    断言：接口返回校验失败（HTTP 4xx 或 error_code != 0）
-    """
+    allure.dynamic.title(f"Token 校验失败 - {case['id']}")
+    allure.dynamic.feature("登录与鉴权")
+    allure.dynamic.story("Token 校验失败")
     resp = _execute_case(client, case)
     expected = case.get("expected", {})
     body = resp.json()
+    _attach_case(case, resp, request_payload=case.get("json"))
 
     if expected.get("error"):
-        if resp.status_code == 200:
-            assert _has_error(body), (
-                f"[{case['id']}] 应返回校验失败: {body}"
-            )
-        else:
-            assert resp.status_code in (400, 401, 422), (
-                f"[{case['id']}] 期望 4xx, 实际 {resp.status_code}"
-            )
+        with allure.step("校验 token 失败响应"):
+            if resp.status_code == 200:
+                assert _has_error(body), (
+                    f"[{case['id']}] 应返回校验失败: {body}"
+                )
+            else:
+                assert resp.status_code in (400, 401, 422), (
+                    f"[{case['id']}] 期望 4xx, 实际 {resp.status_code}"
+                )
 
 
 # ===========================================================================
@@ -307,31 +304,27 @@ def test_token_verify_failure(client: ApiClient, case: dict):
 
 @pytest.mark.auth
 def test_token_verify_success(client: ApiClient, valid_token: str):
-    """
-    Token 校验成功场景：使用登录获取的真实 token 调用校验接口。
-    断言：
-      1. HTTP 状态码 200
-      2. error_code == 0（校验通过）
-    """
-    # 从 YAML 中取出 TC-AUTH-023 用例定义
     case = next((c for c in TOKEN_VERIFY_CASES if c["id"] == "TC-AUTH-023"), None)
     if not case:
         pytest.skip("未找到 TC-AUTH-023 用例")
 
-    # 执行请求，传入 valid_token 替换 YAML 中的 "{valid_token}" 占位符
+    allure.dynamic.title(f"Token 校验成功 - {case['id']}")
+    allure.dynamic.feature("登录与鉴权")
+    allure.dynamic.story("Token 校验成功")
     resp = _execute_case(client, case, token=valid_token)
     expected = case.get("expected", {})
-
-    # 断言 HTTP 状态码
-    if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
-
-    # 断言响应 JSON 中的字段值与 YAML expected.json 一致
     body = resp.json()
+    _attach_case(case, resp, request_payload=case.get("json"))
+
+    if "status_code" in expected:
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
+
     expected_json = expected.get("json", {})
-    for key, val in expected_json.items():
-        assert body.get(key) == val, (
-            f"期望 {key}={val}, 实际 {body.get(key)}"
-        )
+    with allure.step("校验响应字段"):
+        for key, val in expected_json.items():
+            assert body.get(key) == val, (
+                f"期望 {key}={val}, 实际 {body.get(key)}"
+            )

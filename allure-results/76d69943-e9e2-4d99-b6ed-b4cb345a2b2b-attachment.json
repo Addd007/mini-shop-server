@@ -1,0 +1,14 @@
+{
+  "case": {
+    "id": "TC-LOGIN-012-01",
+    "summary": "查询单条登录日志非法ID包含空格失败",
+    "tag": "login_log_detail",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/ abc",
+    "auth": "super",
+    "expected": {
+      "status_code": 400
+    }
+  }
+}

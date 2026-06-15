@@ -1,0 +1,141 @@
+# 订单接口测试用例 - 基于 test_cases/1号/order.md
+# 覆盖：订单提交、订单列表、订单详情
+
+# ======================== 订单提交 ========================
+
+- id: TC-ORDER-001
+  summary: 用户提交订单成功
+  tag: order_place
+  priority: P0
+  method: POST
+  path: /v1/order
+  auth: user
+  json:
+    products:
+      - product_id: 1
+        count: 1
+  expected:
+    status_code: 200
+
+- id: TC-ORDER-002
+  summary: 商品列表参数校验失败
+  tag: order_place
+  priority: P0
+  method: POST
+  path: /v1/order
+  auth: user
+  json:
+    products: []
+  expected:
+    status_code: 400
+
+- id: TC-ORDER-003
+  summary: 商品数量参数非法
+  tag: order_place
+  priority: P0
+  method: POST
+  path: /v1/order
+  auth: user
+  json:
+    products:
+      - product_id: 1
+        count: 0
+  expected:
+    status_code: 400
+
+- id: TC-ORDER-004
+  summary: 未登录提交订单失败
+  tag: order_place
+  priority: P0
+  method: POST
+  path: /v1/order
+  auth: none
+  json:
+    products:
+      - product_id: 1
+        count: 1
+  expected:
+    status_code: 401
+
+# ======================== 订单列表 ========================
+
+- id: TC-ORDER-005
+  summary: 查询订单列表成功
+  tag: order_list
+  priority: P1
+  method: GET
+  path: /v1/order
+  auth: user
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: TC-ORDER-006
+  summary: 订单分页参数校验失败
+  tag: order_list
+  priority: P2
+  method: GET
+  path: /v1/order
+  auth: user
+  params:
+    page: 0
+    size: 100
+  expected:
+    status_code: 400
+
+- id: TC-ORDER-007
+  summary: 未登录查询订单列表失败
+  tag: order_list
+  priority: P1
+  method: GET
+  path: /v1/order
+  auth: none
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 401
+
+# ======================== 订单详情 ========================
+
+- id: TC-ORDER-008
+  summary: 查询订单详情成功
+  tag: order_detail
+  priority: P0
+  method: GET
+  path: /v1/order/1
+  auth: user
+  expected:
+    status_code: 200
+
+- id: TC-ORDER-009
+  summary: 查询不存在的订单
+  tag: order_detail
+  priority: P2
+  method: GET
+  path: /v1/order/9999
+  auth: user
+  expected:
+    status_code: 404
+
+- id: TC-ORDER-010
+  summary: 非法订单ID查询失败
+  tag: order_detail
+  priority: P1
+  method: GET
+  path: /v1/order/abc
+  auth: user
+  expected:
+    status_code: 400
+
+- id: TC-ORDER-011
+  summary: 未登录查询订单详情失败
+  tag: order_detail
+  priority: P1
+  method: GET
+  path: /v1/order/1
+  auth: none
+  expected:
+    status_code: 401

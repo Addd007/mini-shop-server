@@ -15,12 +15,16 @@ __author__ = 'Allen7D'
 
 class ProductDao():
     @staticmethod
-    def create_product():
-        pass
+    def create_product(**form):
+        product = Product.create(**form)
+        return product
 
     @staticmethod
-    def update_product():
-        pass
+    def update_product(id, **form):
+        product = Product.get_or_404(id=id)
+        product.set_attrs(**form)
+        product.update()
+        return product
 
     @staticmethod
     def delete_product(id):

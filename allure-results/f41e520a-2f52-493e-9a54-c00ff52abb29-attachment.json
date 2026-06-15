@@ -1,0 +1,20 @@
+{
+  "case": {
+    "id": "TC-PROD-011",
+    "summary": "查询分类下所有商品成功",
+    "tag": "product_all_category",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/v1/product/all/by_category",
+    "auth": "none",
+    "params": {
+      "category_id": 1
+    },
+    "expected": {
+      "status_code": 200
+    }
+  },
+  "request_payload": {
+    "category_id": 1
+  }
+}

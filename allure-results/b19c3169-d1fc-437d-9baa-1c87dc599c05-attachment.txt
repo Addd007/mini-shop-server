@@ -1,0 +1,1 @@
+{"error_code": 10120, "msg": {"category_id": ["This field is required."]}, "request_url": "GET /v1/product/list/by_category"}

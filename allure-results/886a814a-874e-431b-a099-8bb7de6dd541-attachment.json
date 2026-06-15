@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "TC-AUTH-003",
+    "summary": "普通用户用户名登录成功",
+    "tag": "login_success",
+    "priority": "P0",
+    "method": "POST",
+    "path": "/v1/token",
+    "json": {
+      "account": "user",
+      "secret": "123456",
+      "type": 100
+    },
+    "expected": {
+      "status_code": 200,
+      "has_token": true
+    }
+  },
+  "request_payload": {
+    "account": "user",
+    "secret": "123456",
+    "type": 100
+  }
+}

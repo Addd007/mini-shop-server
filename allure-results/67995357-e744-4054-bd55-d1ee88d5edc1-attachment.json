@@ -1,0 +1,18 @@
+{
+  "case": {
+    "id": "TC-LOGIN-006",
+    "summary": "登录日志列表页码超范围查询",
+    "tag": "login_log_list",
+    "priority": "P2",
+    "method": "GET",
+    "path": "/cms/log/login/list",
+    "auth": "super",
+    "params": {
+      "page": 9999,
+      "size": 10
+    },
+    "expected": {
+      "status_code": 404
+    }
+  }
+}

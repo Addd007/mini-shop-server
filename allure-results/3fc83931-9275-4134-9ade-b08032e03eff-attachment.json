@@ -1,0 +1,15 @@
+{
+  "case": {
+    "id": "TC-USER-002",
+    "summary": "未携带 Token 查询当前用户失败",
+    "tag": "user_info",
+    "priority": "P0",
+    "method": "GET",
+    "path": "/v1/user",
+    "auth": "none",
+    "json": {},
+    "expected": {
+      "error": true
+    }
+  }
+}

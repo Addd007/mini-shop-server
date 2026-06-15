@@ -25,8 +25,10 @@ from typing import Any, Dict
 import subprocess
 import sys
 
+import allure
 import pytest
 
+from tests.common.allure_helper import attach_request_response
 from tests.common.api_client import ApiClient
 from tests.common.case_loader import CaseLoader
 
@@ -115,61 +117,75 @@ def _assert_error_response(case: dict, resp, body: dict):
         )
 
 
+def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
+    allure.dynamic.title(f"登录日志接口 - {case['id']}")
+    allure.dynamic.feature("登录日志管理")
+    allure.dynamic.story(case.get("tag", "登录日志用例"))
+    resp = _execute_case(client, tokens, case)
+    body = resp.json()
+    attach_request_response({"case": case}, resp)
+    return resp, body
+
+
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_LIST_CASES, ids=[c["id"] for c in LOGIN_LOG_LIST_CASES])
 def test_login_log_list(client: ApiClient, tokens: Dict[str, str], case: dict):
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
 
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     else:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
+            )
 
 
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_DETAIL_CASES, ids=[c["id"] for c in LOGIN_LOG_DETAIL_CASES])
 def test_login_log_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
 
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     else:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
+            )
 
 
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_DELETE_CASES, ids=[c["id"] for c in LOGIN_LOG_DELETE_CASES])
 def test_login_log_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
 
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     else:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
+            )
 
 
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_CLEAR_CASES, ids=[c["id"] for c in LOGIN_LOG_CLEAR_CASES])
 def test_login_log_clear(client: ApiClient, tokens: Dict[str, str], case: dict):
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
 
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     else:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}, body={resp.text}"
+            )

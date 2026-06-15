@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "TC-AUTH-008",
+    "summary": "超级管理员手机号登录成功",
+    "tag": "login_success",
+    "priority": "P0",
+    "method": "POST",
+    "path": "/v1/token",
+    "json": {
+      "account": "19900000001",
+      "secret": "123456",
+      "type": 102
+    },
+    "expected": {
+      "status_code": 200,
+      "has_token": true
+    }
+  },
+  "request_payload": {
+    "account": "19900000001",
+    "secret": "123456",
+    "type": 102
+  }
+}

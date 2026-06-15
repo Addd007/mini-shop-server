@@ -1,0 +1,20 @@
+{
+  "case": {
+    "id": "TC-LOGIN-009-01",
+    "summary": "登录日志列表非法时间戳格式校验",
+    "tag": "login_log_list",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/list",
+    "auth": "super",
+    "params": {
+      "page": 1,
+      "size": 10,
+      "start": 123,
+      "end": 456789
+    },
+    "expected": {
+      "status_code": 400
+    }
+  }
+}

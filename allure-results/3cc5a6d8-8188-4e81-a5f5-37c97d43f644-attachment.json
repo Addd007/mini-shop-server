@@ -1,0 +1,14 @@
+{
+  "case": {
+    "id": "TC-LOGIN-013",
+    "summary": "未登录查询单条登录日志失败",
+    "tag": "login_log_detail",
+    "priority": "P1",
+    "method": "GET",
+    "path": "/cms/log/login/1",
+    "auth": "none",
+    "expected": {
+      "status_code": 401
+    }
+  }
+}

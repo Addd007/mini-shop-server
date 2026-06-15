@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "TC-AUTH-019",
+    "summary": "空密码登录校验",
+    "tag": "validation",
+    "priority": "P0",
+    "method": "POST",
+    "path": "/v1/token",
+    "json": {
+      "account": "user",
+      "secret": "",
+      "type": 100
+    },
+    "expected": {
+      "has_token": false,
+      "error": true
+    }
+  },
+  "request_payload": {
+    "account": "user",
+    "secret": "",
+    "type": 100
+  }
+}

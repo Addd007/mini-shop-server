@@ -1,0 +1,1 @@
+{"error_code": 10100, "msg": "\u672a\u67e5\u8be2\u5230\u6570\u636e", "request_url": "DELETE /v1/product/33"}

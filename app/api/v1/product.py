@@ -8,13 +8,23 @@ from app.extensions.api_docs.v1 import product as api_doc
 from app.core.token_auth import auth
 from app.models.product import Product
 from app.dao.product import ProductDao
-from app.libs.error_code import Success
+from app.libs.error_code import Success, ParameterException
 from app.core.utils import paginate
 from app.validators.forms import CountValidator, CategoryIDValidator, ReorderValidator
 
 __author__ = 'Allen7D'
 
 api = Redprint(name='product', module='产品', api_doc=api_doc)
+
+
+def _parse_positive_id(value):
+    try:
+        parsed_id = int(str(value).strip())
+    except (TypeError, ValueError):
+        raise ParameterException(msg='ID 必须为正整数')
+    if parsed_id <= 0:
+        raise ParameterException(msg='ID 必须为正整数')
+    return parsed_id
 
 
 @api.route('/recent', methods=['GET'])
@@ -48,10 +58,11 @@ def get_list_by_category():
     return Success(rv)
 
 
-@api.route('/<int:id>', methods=['GET'])
+@api.route('/<id>', methods=['GET'])
 @api.doc(args=['g.path.product_id'])
 def get_product(id):
     '''查询商品'''
+    id = _parse_positive_id(id)
     product = ProductDao.get_product(id=id)
     return Success(product)
 
@@ -62,34 +73,39 @@ def get_product(id):
 @auth.group_required
 def create_product():
     '''新增商品'''
-    return Success(error_code=1)
+    product = ProductDao.create_product()
+    return Success(product, error_code=1)
 
 
-@api.route('/<int:id>', methods=['PUT'])
+@api.route('/<id>', methods=['PUT'])
 @api.route_meta(auth='更新商品', module='商品')
 @api.doc(args=['g.path.product_id'], auth=True)
 @auth.group_required
 def update_product(id):
     '''更新商品'''
-    return Success(error_code=1)
+    id = _parse_positive_id(id)
+    product = ProductDao.update_product(id)
+    return Success(product, error_code=1)
 
 
-@api.route('/<int:id>', methods=['DELETE'])
+@api.route('/<id>', methods=['DELETE'])
 @api.route_meta(auth='删除商品', module='商品')
 @api.doc(args=['g.path.product_id'], auth=True)
 @auth.group_required
 def delete_product(id):
     '''删除商品'''
+    id = _parse_positive_id(id)
     ProductDao.delete_product(id)
     return Success(error_code=2)
 
 
-@api.route('/<int:id>/reorder', methods=['PUT'])
+@api.route('/<id>/reorder', methods=['PUT'])
 @api.route_meta(auth='排序商品图片', module='商品')
 @api.doc(args=['g.path.product_id', 'g.body.src_order', 'g.body.dest_order'], auth=True)
 @auth.group_required
 def reorder_image(id):
     '''排序商品图片'''
+    id = _parse_positive_id(id)
     validator = ReorderValidator().nt_data
     ProductDao.reorder_image(p_id=id, src_order=validator.src_order, dest_order=validator.dest_order)
     return Success(error_code=1)

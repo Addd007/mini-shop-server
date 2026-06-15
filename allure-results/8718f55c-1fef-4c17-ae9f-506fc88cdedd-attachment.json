@@ -1,0 +1,24 @@
+{
+  "case": {
+    "id": "TC-AUTH-006",
+    "summary": "普通用户邮箱登录成功",
+    "tag": "login_success",
+    "priority": "P1",
+    "method": "POST",
+    "path": "/v1/token",
+    "json": {
+      "account": "111@qq.com",
+      "secret": "123456",
+      "type": 101
+    },
+    "expected": {
+      "status_code": 200,
+      "has_token": true
+    }
+  },
+  "request_payload": {
+    "account": "111@qq.com",
+    "secret": "123456",
+    "type": 101
+  }
+}
