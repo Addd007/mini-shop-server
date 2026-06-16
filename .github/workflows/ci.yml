@@ -50,13 +50,19 @@ jobs:
       - name: Run tests with Allure results
         run: uv run pytest --alluredir=allure-results
 
+      - name: Set up Node.js
+        if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Allure CLI
+        if: always()
+        run: npm install -g allure-commandline
+
       - name: Generate Allure HTML report
         if: always()
-        uses: simple-elf/allure-report-action@v1.9
-        with:
-          allure_results: allure-results
-          allure_report: allure-report
-          gh_pages: false
+        run: allure generate allure-results -o allure-report --clean
 
       - name: Upload Allure results
         if: always()
