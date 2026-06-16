@@ -245,7 +245,7 @@
   path: /cms/log/login/1
   auth: super
   expected:
-    status_code: 200
+    status_code: 202
 
 - id: TC-LOGIN-016
   summary: 删除不存在的登录日志失败

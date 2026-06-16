@@ -3,7 +3,7 @@
 
 测试依据：test_cases/1号/auth.md
 数据来源：tests/cases/auth/auth_cases.yaml（YAML 数据驱动，新增用例只需编辑 YAML）
-前置条件：服务已启动，且已执行 fake.py 初始化测试账号
+前置条件：服务已启动，且已执行 fake.py 初始化用户测试数据
 
 测试分组（按 YAML 中的 tag 字段划分）：
   - login_success : 正常登录（用户名/邮箱/手机号），验证返回有效 Token
@@ -96,8 +96,13 @@ TOKEN_VERIFY_CASES = _filter_by_tag(ALL_CASES, "token_verify")     # TC-AUTH-018
 # Fixtures
 # ---------------------------------------------------------------------------
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def initialize_test_data():
+    subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"],
+        check=True,
+    )
+    yield
     subprocess.run(
         [sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"],
         check=True,

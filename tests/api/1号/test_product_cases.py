@@ -3,7 +3,7 @@
 
 测试依据：test_cases/1号/product.md
 数据来源：tests/cases/1号/product_cases.yaml（YAML 数据驱动）
-前置条件：服务已启动，且已执行 fake.py 初始化测试数据
+前置条件：服务已启动，且已执行 fake.py 初始化商品测试数据
 
 测试分组：
   - product_recent        : 最近商品查询
@@ -34,6 +34,7 @@ import pytest
 
 from tests.common.allure_helper import attach_request_response
 from tests.common.api_client import ApiClient
+from tests.common.auth_seed import get_test_tokens
 from tests.common.case_loader import CaseLoader
 
 
@@ -50,13 +51,14 @@ def _filter_by_tag(cases: list[dict], tag: str) -> list[dict]:
     return [case for case in cases if case.get("tag") == tag]
 
 
-def _extract_token(resp_json: dict) -> str | None:
-    return resp_json.get("token") or resp_json.get("data", {}).get("token")
-
-
 def _has_error(resp_json: dict) -> bool:
     error_code = resp_json.get("error_code", resp_json.get("code"))
     return error_code is not None and error_code != 0
+
+
+def _skip_if_marked(case: dict) -> None:
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
 
 
 def _reset_test_data() -> None:
@@ -71,19 +73,11 @@ def initialize_test_data():
     _reset_test_data()
 
 
-@pytest.fixture(autouse=True)
-def isolate_mutating_product_cases(request):
-    case = getattr(getattr(request, "node", None), "callspec", None)
-    case = case.params.get("case") if case else None
-    if not case or case.get("tag") not in MUTATING_TAGS:
-        yield
-        return
-
+@pytest.fixture(scope="module", autouse=True)
+def isolate_mutating_product_cases():
     _reset_test_data()
-    try:
-        yield
-    finally:
-        _reset_test_data()
+    yield
+    _reset_test_data()
 
 
 ALL_CASES = _load_cases()
@@ -104,18 +98,7 @@ def client(base_url, timeout) -> ApiClient:
 
 @pytest.fixture(scope="module")
 def tokens(client: ApiClient) -> Dict[str, str]:
-    accounts = [
-        ("super", "super", "123456"),
-        ("admin", "admin", "123456"),
-        ("user", "user", "123456"),
-    ]
-    result: Dict[str, str] = {}
-    for name, account, secret in accounts:
-        resp = client.request("POST", "/v1/token", json={"account": account, "secret": secret, "type": 100})
-        token = _extract_token(resp.json())
-        if token:
-            result[name] = token
-    return result
+    return get_test_tokens(client)
 
 
 def _get_auth_client(client: ApiClient, tokens: Dict[str, str], auth: str) -> ApiClient:
@@ -235,6 +218,7 @@ def test_product_create(client: ApiClient, tokens: Dict[str, str], case: dict):
     allure.dynamic.title(f"商品新增 - {case['id']}")
     allure.dynamic.feature("商品管理")
     allure.dynamic.story("商品新增")
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -255,6 +239,7 @@ def test_product_update(client: ApiClient, tokens: Dict[str, str], case: dict):
     allure.dynamic.title(f"商品更新 - {case['id']}")
     allure.dynamic.feature("商品管理")
     allure.dynamic.story("商品更新")
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()

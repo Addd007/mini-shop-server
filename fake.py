@@ -16,12 +16,13 @@ from app.models.category import Category
 from app.models.identity import Identity
 from app.models.image import Image
 from app.models.m2m import Product2Image
+from app.models.order import Order
 from app.models.product import Product
+from app.models.login_log import LoginLog
 from app.models.product_property import Product2Property
 from app.models.user import User
 
 __author__ = 'Allen7D'
-
 
 PASSWORD_HASH = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
 
@@ -120,6 +121,20 @@ IMAGE_SEEDS = [
     (67, '/product-vg@5.png'), (68, '/product-vg@2.png'), (69, '/product-vg@3.png'),
 ]
 
+ORDER_SEEDS = [
+    {"id": 1, "order_no": "B0X435186095427189", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588130000, "update_time": 1628692672, "delete_time": None},
+    {"id": 2, "order_no": "B0X439892335427188", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588131000, "update_time": 1628692680, "delete_time": None},
+    {"id": 18, "order_no": "B0X433513735427169", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588132000, "update_time": 1628692687, "delete_time": None},
+    {"id": 19, "order_no": "B0X431906695427191", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588133000, "update_time": 1628692695, "delete_time": None},
+    {"id": 22, "order_no": "B0X436611625427134", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588134000, "update_time": 1628692704, "delete_time": None},
+    {"id": 23, "order_no": "B0X434107455427153", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588135000, "update_time": 1628692711, "delete_time": None},
+    {"id": 24, "order_no": "B0X436584155427116", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "和瑞科技园 S1-1302", "detail": "", "id": 2, "mobile": "13788889999", "name": "董小小", "province": "浙江省", "user_id": 2}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588136000, "update_time": 1628692732, "delete_time": None},
+    {"id": 25, "order_no": "B0XB42397767285726", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 2, "has_stock": true, "count": 10, "name": "梨花带雨 3个", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "中国", "detail": "和瑞科技园 S1-1302", "mobile": 13788889999, "name": "段兵兵", "province": "浙江省"}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588137000, "update_time": 1628692744, "delete_time": None},
+    {"id": 26, "order_no": "B0XB43649737285735", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤 等", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}, {"id": 11, "has_stock": true, "count": 10, "name": "贵妃笑 100克", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "中国", "detail": "和瑞科技园 S1-1302", "mobile": 13788889999, "name": "段兵兵", "province": "浙江省"}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588138000, "update_time": 1628692723, "delete_time": None},
+    {"id": 27, "order_no": "B0XB40017347285790", "user_id": 1, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-rice@1.png", "snap_name": "素米 327克 等", "snap_items": '[{"id": 3, "has_stock": true, "count": 10, "name": "素米 327克", "total_price": 0.1}, {"id": 4, "has_stock": true, "count": 10, "name": "红袖枸杞 6克*3袋", "total_price": 0.1}]', "snap_address": '{"city": "杭州市", "country": "中国", "detail": "和瑞科技园 S1-1302", "mobile": 13788889999, "name": "段兵兵", "province": "浙江省"}', "total_count": 20, "total_price": 0.20, "prepay_id": None, "create_time": 1588138500, "update_time": 1628692664, "delete_time": None},
+    {"id": 28, "order_no": "C0X4262413568787205", "user_id": 3, "order_status": 1, "snap_img": "0.0.0.0:8010/static/images/product-vg@1.png", "snap_name": "芹菜 半斤", "snap_items": '[{"id": 1, "has_stock": true, "count": 10, "name": "芹菜 半斤", "total_price": 0.1}]', "snap_address": '{"city": "杭州", "country": "萧山", "detail": "金地三期2栋2单元701室", "mobile": 13799999999, "name": "董小小", "province": "浙江"}', "total_count": 10, "total_price": 0.10, "prepay_id": None, "create_time": 1588139000, "update_time": 1628692649, "delete_time": None},
+]
+
 
 def _truncate_tables(tables: Iterable[str]) -> None:
     db.session.execute(text("SET FOREIGN_KEY_CHECKS=0"))
@@ -134,36 +149,16 @@ def seed_users() -> None:
     _truncate_tables(["identity", "article", "user"])
     user_table = User.__table__
     identity_table = Identity.__table__
-
     for user in USER_SEEDS:
-        db.session.execute(
-            user_table.insert().values(
-                id=user["id"],
-                nickname=user["nickname"],
-                auth=user["auth"],
-                group_id=user["group_id"],
-                avatar=user["avatar"],
-                extend=None,
-                create_time=user.get("create_time", None),
-                update_time=user.get("update_time", None),
-                delete_time=user.get("delete_time", None)
-            )
-        )
-
+        db.session.execute(user_table.insert().values(
+            id=user["id"], nickname=user["nickname"], auth=user["auth"], group_id=user["group_id"], avatar=user["avatar"], extend=None,
+            create_time=user.get("create_time"), update_time=user.get("update_time"), delete_time=user.get("delete_time"),
+        ))
     for identity in IDENTITY_SEEDS:
-        db.session.execute(
-            identity_table.insert().values(
-                id=identity["id"],
-                user_id=identity["user_id"],
-                type=identity["type"],
-                identifier=identity["identifier"],
-                credential=identity["credential"],
-                verified=identity["verified"],
-                create_time=identity.get("create_time", None),
-                update_time=identity.get("update_time", None),
-                delete_time=identity.get("delete_time", None)
-            )
-        )
+        db.session.execute(identity_table.insert().values(
+            id=identity["id"], user_id=identity["user_id"], type=identity["type"], identifier=identity["identifier"], credential=identity["credential"], verified=identity["verified"],
+            create_time=identity.get("create_time"), update_time=identity.get("update_time"), delete_time=identity.get("delete_time"),
+        ))
 
 
 def seed_products() -> None:
@@ -173,7 +168,6 @@ def seed_products() -> None:
     product_table = Product.__table__
     product_image_table = Product2Image.__table__
     property_table = Product2Property.__table__
-
     for img_id, url in IMAGE_SEEDS:
         db.session.execute(image_table.insert().values(id=img_id, url=url, **{"from": 1}))
     for category in CATEGORY_SEEDS:
@@ -187,9 +181,34 @@ def seed_products() -> None:
         db.session.execute(property_table.insert().values(id=pid, name=name, detail=detail, product_id=product_id))
 
 
+def seed_orders() -> None:
+    _truncate_tables(["order"])
+    order_table = Order.__table__
+    for row in ORDER_SEEDS:
+        db.session.execute(order_table.insert().values(**row))
+
+
+def seed_login_logs() -> None:
+    _truncate_tables(["login_log"])
+    login_log_table = LoginLog.__table__
+    for log in [
+        {"id": 1, "user_id": 31, "user_name": "user", "ip_addr": "127.0.0.1", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592230004},
+        {"id": 2, "user_id": 31, "user_name": "user", "ip_addr": "127.0.0.1", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592230619},
+        {"id": 3, "user_id": 3, "user_name": "super", "ip_addr": "127.0.0.1", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592231445},
+        {"id": 4, "user_id": 3, "user_name": "super", "ip_addr": "127.0.0.1", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592231613},
+        {"id": 5, "user_id": 3, "user_name": "super", "ip_addr": "127.0.0.1", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592231618},
+        {"id": 6, "user_id": 31, "user_name": "user", "ip_addr": "127.0.0.1", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592231620},
+        {"id": 7, "user_id": 3, "user_name": "super", "ip_addr": "192.168.10.80", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592272492},
+        {"id": 8, "user_id": 4, "user_name": "Allen7D", "ip_addr": "192.168.10.80", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592273245},
+        {"id": 9, "user_id": 31, "user_name": "user", "ip_addr": "192.168.10.80", "location": "内网IP", "browser": "chrome", "os": "macos", "message": "", "status": 1, "create_time": 1592273358},
+        {"id": 10, "user_id": 3, "user_name": "super", "ip_addr": "192.168.10.74", "location": "内网IP", "browser": "chrome", "os": "windows", "message": "", "status": 1, "create_time": 1592273401},
+    ]:
+        db.session.execute(login_log_table.insert().values(**log))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scope", choices=("users", "products", "all"), default="all")
+    parser.add_argument("--scope", choices=("users", "products", "orders", "login_log", "all"), default="all")
     args = parser.parse_args()
 
     app = create_app()
@@ -199,6 +218,10 @@ def main() -> None:
                 seed_users()
             if args.scope in ("products", "all"):
                 seed_products()
+            if args.scope in ("orders", "all"):
+                seed_orders()
+            if args.scope in ("login_log", "all"):
+                seed_login_logs()
 
 
 if __name__ == '__main__':

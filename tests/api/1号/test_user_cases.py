@@ -1,22 +1,22 @@
 """
 用户接口自动化测试
 
-测试依据：test_cases/1号/user.md
-数据来源：tests/cases/user/user_cases.yaml（YAML 数据驱动）
-前置条件：服务已启动，且已执行 fake.py 初始化测试账号
+测试依据：tests/cases/1号/user_cases.yaml
+数据来源：tests/cases/1号/user_cases.yaml（YAML 数据驱动）
+前置条件：服务已启动，且已执行 fake.py 初始化用户测试数据
 
 测试分组（按 YAML 中的 tag 字段划分）：
   - user_info       : 用户信息查询（TC-USER-001 ~ 002）
-  - user_auths      : 权限查询（TC-USER-003 ~ 004）
-  - avatar          : 头像修改（TC-USER-005）
-  - password        : 密码修改（TC-USER-006 ~ 013）
-  - profile         : 资料修改（TC-USER-014 ~ 015）
-  - profile_conflict: 资料重复校验（TC-USER-016 ~ 018）
+  - user_auths      : 权限查询（TC-USER-003）
+  - avatar          : 头像修改（TC-USER-004）
+  - password        : 密码修改（TC-USER-005 ~ 009）
+  - profile         : 资料修改（TC-USER-010 ~ 011）
+  - profile_conflict: 资料重复校验（TC-USER-012 ~ 014）
   
-  - unbind          : 账号解绑（TC-USER-019 ~ 021）
-  - bind            : 账号绑定（TC-USER-022 ~ 027）
-  - delete_account  : 注销账号（TC-USER-028）
-  - register_reuse  : 删除后复用注册（TC-USER-029 ~ 030）
+  - unbind          : 账号解绑（TC-USER-015 ~ 017）
+  - bind            : 账号绑定（TC-USER-018 ~ 021）
+  - delete_account  : 注销账号（TC-USER-022）
+  - register_reuse  : 删除后复用注册（TC-USER-023 ~ 024）
 
 运行方式：
   pytest tests/api/1号/test_user_cases.py -v              # 全量运行
@@ -37,6 +37,7 @@ import pytest
 
 from tests.common.allure_helper import attach_request_response
 from tests.common.api_client import ApiClient
+from tests.common.auth_seed import get_test_tokens
 from tests.common.case_loader import CaseLoader
 
 
@@ -51,8 +52,8 @@ def _load_cases() -> list[dict[str, Any]]:
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_test_data():
-    """每轮测试前重建基础测试数据。"""
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
+    """每轮测试前重建用户基础测试数据。"""
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"], check=True)
 
 
 def _filter_by_tag(cases: list[dict], tag: str) -> list[dict]:
@@ -100,27 +101,8 @@ def client(base_url, timeout) -> ApiClient:
 
 @pytest.fixture(scope="module")
 def tokens(client: ApiClient) -> Dict[str, str]:
-    """
-    预先登录多个测试账号，获取各自的 token。
-    返回字典：{"super": token, "admin": token, "user": token}
-    """
-    accounts = [
-        ("super", "super", "123456"),
-        ("admin", "admin", "123456"),
-        ("user", "user", "123456"),
-    ]
-    result = {}
-    for name, account, secret in accounts:
-        resp = client.request("POST", "/v1/token", json={
-            "account": account,
-            "secret": secret,
-            "type": 100,
-        })
-        data = resp.json()
-        token = _extract_token(data)
-        if token:
-            result[name] = token
-    return result
+    """预先登录多个测试账号，获取各自的 token。"""
+    return get_test_tokens(client)
 
 
 def _get_auth_client(client: ApiClient, tokens: Dict[str, str], auth: str) -> ApiClient:
@@ -176,6 +158,18 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
     return resp, body
 
 
+def _skip_if_marked(case: dict):
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
+
+
+@pytest.fixture(scope="module", autouse=True)
+def isolate_user_cases_module():
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"], check=True)
+    yield
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"], check=True)
+
+
 # ===========================================================================
 # 用户信息查询 (TC-USER-001 ~ TC-USER-002)
 # ===========================================================================
@@ -188,6 +182,7 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_user_info(client: ApiClient, tokens: Dict[str, str], case: dict):
     """用户信息查询：验证登录态和返回字段"""
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -209,7 +204,7 @@ def test_user_info(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 权限查询 (TC-USER-003 ~ TC-USER-004)
+# 权限查询 (TC-USER-003)
 # ===========================================================================
 
 @pytest.mark.user
@@ -220,6 +215,7 @@ def test_user_info(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_user_auths(client: ApiClient, tokens: Dict[str, str], case: dict):
     """权限查询：验证不同角色的权限列表"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -230,7 +226,7 @@ def test_user_auths(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 头像修改 (TC-USER-005)
+# 头像修改 (TC-USER-004)
 # ===========================================================================
 
 @pytest.mark.user
@@ -241,6 +237,7 @@ def test_user_auths(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_avatar_update(client: ApiClient, tokens: Dict[str, str], case: dict):
     """头像修改：验证头像 URL 更新"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -251,7 +248,7 @@ def test_avatar_update(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 密码修改 (TC-USER-006 ~ TC-USER-013)
+# 密码修改 (TC-USER-005 ~ TC-USER-009)
 # ===========================================================================
 
 @pytest.mark.user
@@ -265,6 +262,7 @@ def test_password_change(client: ApiClient, tokens: Dict[str, str], case: dict):
     密码修改：验证密码规则校验和修改逻辑。
     注意：部分用例会真正修改密码，可能影响后续测试，需要 teardown 恢复。
     """
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -338,7 +336,7 @@ def _delete_reused_account(client: ApiClient, case: dict):
 
 
 # ===========================================================================
-# 资料修改 (TC-USER-014 ~ TC-USER-015)
+# 资料修改 (TC-USER-010 ~ TC-USER-011)
 # ===========================================================================
 
 @pytest.mark.user
@@ -349,6 +347,7 @@ def _delete_reused_account(client: ApiClient, case: dict):
 )
 def test_profile_update(client: ApiClient, tokens: Dict[str, str], case: dict):
     """资料修改：验证用户资料更新"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -359,7 +358,7 @@ def test_profile_update(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 资料重复校验 (TC-USER-016 ~ TC-USER-018)
+# 资料重复校验 (TC-USER-012 ~ TC-USER-014)
 # ===========================================================================
 
 @pytest.mark.user
@@ -370,6 +369,7 @@ def test_profile_update(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_profile_conflict(client: ApiClient, tokens: Dict[str, str], case: dict):
     """资料重复校验：用户名/手机号/邮箱已被占用时应返回错误"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -382,7 +382,7 @@ def test_profile_conflict(client: ApiClient, tokens: Dict[str, str], case: dict)
 
 
 # ===========================================================================
-# 账号解绑 (TC-USER-020 ~ TC-USER-023)
+# 账号解绑 (TC-USER-015 ~ TC-USER-017)
 # ===========================================================================
 
 @pytest.mark.user
@@ -393,6 +393,7 @@ def test_profile_conflict(client: ApiClient, tokens: Dict[str, str], case: dict)
 )
 def test_account_unbind(client: ApiClient, tokens: Dict[str, str], case: dict):
     """账号解绑：验证解绑逻辑"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -406,7 +407,7 @@ def test_account_unbind(client: ApiClient, tokens: Dict[str, str], case: dict):
             )
 
 # ===========================================================================
-# 账号绑定 (TC-USER-024 ~ TC-USER-027)
+# 账号绑定 (TC-USER-018 ~ TC-USER-021)
 # ===========================================================================
 
 @pytest.mark.user
@@ -417,6 +418,7 @@ def test_account_unbind(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_account_bind(client: ApiClient, tokens: Dict[str, str], case: dict):
     """账号绑定：验证重复绑定和已占用账号的错误处理"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -426,7 +428,7 @@ def test_account_bind(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 注销账号 (TC-USER-028)
+# 注销账号 (TC-USER-022)
 # ===========================================================================
 
 @pytest.mark.user
@@ -441,7 +443,8 @@ def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
     注销账号：验证账号删除功能。
     警告：此测试会真正删除 user 账号，执行前先重新初始化测试数据。
     """
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
+    _skip_if_marked(case)
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"], check=True)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -452,7 +455,7 @@ def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
 
 
 # ===========================================================================
-# 删除后复用注册 (TC-USER-029 ~ TC-USER-030)
+# 删除后复用注册 (TC-USER-023 ~ TC-USER-024)
 # ===========================================================================
 
 @pytest.mark.user
@@ -464,6 +467,7 @@ def test_delete_account(client: ApiClient, tokens: Dict[str, str], case: dict):
 )
 def test_register_reuse(client: ApiClient, case: dict):
     """删除后复用注册：验证用户名+手机号/邮箱命中已删除账号时可复用。"""
+    _skip_if_marked(case)
     _ensure_reuse_seed_deleted(client)
     resp = client.request(
         method=case.get("method", "POST"),

@@ -3,7 +3,7 @@
 
 测试依据：test_cases/1号/login_log.md
 数据来源：tests/cases/1号/login_log.yaml（YAML 数据驱动，新增用例只需编辑 YAML）
-前置条件：服务已启动，且已执行 fake.py 初始化测试账号
+前置条件：服务已启动，且已执行 fake.py 初始化登录日志数据
 
 测试分组（按 YAML 中的 tag 字段划分）：
   - login_log_list   : 登录日志列表（TC-LOGIN-001 ~ 009）
@@ -54,9 +54,11 @@ def _has_error(resp_json: dict) -> bool:
     return error_code is not None and error_code != 0
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def initialize_test_data():
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "login_log"], check=True)
+    yield
+    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "login_log"], check=True)
 
 
 ALL_CASES = _load_cases()
