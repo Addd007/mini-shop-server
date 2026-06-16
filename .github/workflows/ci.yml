@@ -76,6 +76,11 @@ jobs:
           echo "MySQL was not ready in time" >&2
           exit 1
 
+      - name: Import database schema and seed data
+        run: |
+          mysql -h 127.0.0.1 -uroot -pZBH924zxcvbnm zerd < zerd.sql
+          uv run python fake.py
+
       - name: Start app server
         run: |
           nohup uv run python server.py run -h 127.0.0.1 -p 5000 > server.log 2>&1 &
