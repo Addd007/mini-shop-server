@@ -76,6 +76,24 @@ jobs:
           echo "MySQL was not ready in time" >&2
           exit 1
 
+      - name: Start app server
+        run: |
+          nohup uv run python server.py run -h 127.0.0.1 -p 5000 > server.log 2>&1 &
+
+      - name: Wait for app server
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:5000/v1/token >/dev/null 2>&1; then
+              echo "App server is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "App server was not ready in time" >&2
+          echo "---- server.log ----" >&2
+          cat server.log >&2
+          exit 1
+
       - name: Run tests with Allure results
         run: uv run pytest --alluredir=allure-results
 
