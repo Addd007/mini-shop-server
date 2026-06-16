@@ -13,6 +13,12 @@ __author__ = 'Allen7D'
 app = create_app()
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
+
+@app.route("/health", methods=["GET"])
+def health_check():
+    return {"status": "ok"}, 200
+
+
 @app.cli.command("run")
 @click.option('--host', default='127.0.0.1', help='The host to bind to.')
 @click.option('--port', default=5000, help='The port to bind to.')
