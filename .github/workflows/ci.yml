@@ -67,16 +67,8 @@ jobs:
       - name: Wait for MySQL
         run: |
           for i in {1..30}; do
-            if uv run python - <<'PY'
-import pymysql
-try:
-    conn = pymysql.connect(host="127.0.0.1", user="root", password="ZBH924zxcvbnm", database="zerd", port=3306)
-    conn.close()
-    print("MySQL is ready")
-except Exception as exc:
-    raise SystemExit(1)
-PY
-            then
+            if uv run python -c "import pymysql; conn = pymysql.connect(host='127.0.0.1', user='root', password='ZBH924zxcvbnm', database='zerd', port=3306); conn.close()"; then
+              echo "MySQL is ready"
               exit 0
             fi
             sleep 2
