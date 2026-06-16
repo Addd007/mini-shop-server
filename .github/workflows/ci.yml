@@ -31,6 +31,23 @@ jobs:
       matrix:
         python-version: ["3.8"]
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ZBH924zxcvbnm
+          MYSQL_DATABASE: zerd
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pZBH924zxcvbnm"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      PYTHONUNBUFFERED: "1"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -46,6 +63,26 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --all-extras
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if uv run python - <<'PY'
+import pymysql
+try:
+    conn = pymysql.connect(host="127.0.0.1", user="root", password="ZBH924zxcvbnm", database="zerd", port=3306)
+    conn.close()
+    print("MySQL is ready")
+except Exception as exc:
+    raise SystemExit(1)
+PY
+            then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL was not ready in time" >&2
+          exit 1
 
       - name: Run tests with Allure results
         run: uv run pytest --alluredir=allure-results
