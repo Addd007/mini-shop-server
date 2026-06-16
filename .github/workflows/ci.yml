@@ -99,6 +99,9 @@ jobs:
           cat server.log >&2
           exit 1
 
+      - name: Clean Allure output
+        run: rm -rf allure-results allure-report
+
       - name: Run tests with Allure results
         run: uv run pytest --alluredir=allure-results
 
