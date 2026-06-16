@@ -12,6 +12,7 @@
   [![Python Version](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
   [![Flask Version](https://img.shields.io/badge/Flask-2.0.3-green.svg)](https://flask.palletsprojects.com/)
   [![API Docs](https://img.shields.io/badge/API%20Docs-Swagger-orange.svg)](http://47.114.33.143:9000/apidocs/#/)
+  [![CI](https://github.com/Allen7D/mini-shop-server/actions/workflows/ci.yml/badge.svg)](https://github.com/Allen7D/mini-shop-server/actions/workflows/ci.yml)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
   [![Stars](https://img.shields.io/github/stars/Allen7D/mini-shop-server.svg)](https://github.com/Allen7D/mini-shop-server)
 </div>
@@ -509,6 +510,11 @@ allure serve allure-results
 allure generate allure-results -o allure-report --clean
 allure open allure-report
 ```
+
+### CI 中查看报告
+- CI 会在每次运行后上传 `allure-results` 和 `allure-report` 两个产物
+- 进入 GitHub Actions 的对应 workflow 运行记录即可下载
+- 下载后可本地执行 `allure open allure-report` 查看 HTML 报告
 
 ### 常见问题
 ```bash

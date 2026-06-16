@@ -40,6 +40,7 @@ dependencies = [
 dev = [
     "pylint==3.0.3",
     "pytest==7.4.3",
+    "allure-pytest==2.13.5",
     "flasgger==0.9.5",
     "flask-admin==1.6.1",
 ]
@@ -67,6 +68,7 @@ packages = ["app"]
 dev-dependencies = [
     "pylint==3.0.3",
     "pytest==7.4.3",
+    "allure-pytest==2.13.5",
     "flasgger==0.9.5",
     "flask-admin==1.6.1",
 ]
@@ -76,7 +78,20 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --tb=short"
+addopts = "-v --tb=short -ra"
+markers = [
+    "smoke: 冒烟测试",
+    "regression: 回归测试",
+    "auth: 登录鉴权相关测试",
+    "order: 订单支付相关测试",
+    "file: 文件上传下载相关测试",
+    "rbac: 权限与菜单相关测试",
+    "login_log: 登录日志相关测试",
+    "user: 用户相关测试",
+    "product: 商品相关测试",
+    "delete_account: 注销账号相关测试",
+    "register_reuse: 删除后复用注册相关测试",
+]
 
 [tool.pylint.messages_control]
 disable = [
