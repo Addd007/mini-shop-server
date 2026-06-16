@@ -197,7 +197,7 @@
   tag: product_delete
   priority: P1
   method: DELETE
-  path: /v1/product/33
+  path: /v1/product/30
   auth: super
   expected:
     status_code: 202
