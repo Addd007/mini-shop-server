@@ -53,7 +53,10 @@ def _has_error(resp_json: dict) -> bool:
 
 @pytest.fixture(scope="session", autouse=True)
 def initialize_test_data():
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
+    subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"],
+        check=True,
+    )
 
 
 ALL_CASES = _load_cases()

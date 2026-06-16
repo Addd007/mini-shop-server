@@ -38,6 +38,7 @@ from tests.common.case_loader import CaseLoader
 
 
 CASE_FILE = "cases/1号/product_cases.yaml"
+MUTATING_TAGS = {"product_create", "product_update", "product_delete", "product_reorder"}
 
 
 def _load_cases() -> list[dict[str, Any]]:
@@ -58,9 +59,31 @@ def _has_error(resp_json: dict) -> bool:
     return error_code is not None and error_code != 0
 
 
+def _reset_test_data() -> None:
+    subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "products"],
+        check=True,
+    )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def initialize_test_data():
-    subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py")], check=True)
+    _reset_test_data()
+
+
+@pytest.fixture(autouse=True)
+def isolate_mutating_product_cases(request):
+    case = getattr(getattr(request, "node", None), "callspec", None)
+    case = case.params.get("case") if case else None
+    if not case or case.get("tag") not in MUTATING_TAGS:
+        yield
+        return
+
+    _reset_test_data()
+    try:
+        yield
+    finally:
+        _reset_test_data()
 
 
 ALL_CASES = _load_cases()

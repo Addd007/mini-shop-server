@@ -305,22 +305,22 @@ create table identity
 create index user_id
     on identity (user_id);
 
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (1, 3, 101, '666@qq.com', 'pbkdf2:sha256:150000$Oh2TxEHw$e497614a0209566491df406275aca2a15ea45c42c4c5132526c323bbfd530fab', 1, 1586767003, 1587019825, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (1, 3, 101, '666@qq.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1586767003, 1587019825, null);
 INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (2, 3, 200, 'oYf_s0OnCim9Cx7tCV-AHs_rDWXs', null, 1, 1586767003, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (3, 1, 101, '999@qq.com', 'pbkdf2:sha256:150000$0YA1wZOx$028783c07999fd6ed8050c2f831857ac602218bcbc2399072f7f50064a30109e', 1, 1586767003, 1592288770, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (4, 3, 100, 'Allen7D', 'pbkdf2:sha256:150000$dlyAHfD8$691ba12bf1e0183f90f70c489ebb89a93040dbc90a733363871453919e476f6d', 1, 1586767003, 1587019825, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (5, 3, 102, '13758787058', 'pbkdf2:sha256:150000$SQwNb0bE$24f9d9ee1372bdf298f7fe70d41f4fb848991049491cd82aff2e9dd7cecba5da', 1, 1586767003, 1587102577, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (7, 2, 101, '777@qq.com', 'pbkdf2:sha256:50000$YrYmLzfp$981a20fc95c1dfc423866be176c0a66b728a95f9c285d6b731af05349112d2f9', 1, 1586767003, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (8, 27, 100, 'Allen2D', 'pbkdf2:sha256:150000$MVGqTbkT$e48eebef1b43782f262c72b9043b706ff27580619e45dae15437c7f9a51cf280', 0, 1587024948, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (9, 27, 102, '13755555555', 'pbkdf2:sha256:150000$sZdQl4R0$fe697627c25a0407b438a304268ff9a681876772482edfdfb3258a863c4b1151', 0, 1587024948, 1587029097, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (10, 27, 101, '555@qq.com', 'pbkdf2:sha256:150000$Jojx9DNW$1307d58aabc221e8a0d098e48877eb00256ff07dbeec439ce38d30b47d82e6cc', 0, 1587024956, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (14, 30, 100, 'Allen3D', 'pbkdf2:sha256:150000$vHwJolCh$a77780e06b034058a5b0ac2263dd965b9539916464e80ad747bd51a3c5465c73', 1, 1587043791, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (15, 30, 102, '13758787053', 'pbkdf2:sha256:150000$fJpShyPb$e2fe9caae9780a81bc351cc4d289c6be9a2be4b6176dc7ad012b58867580da1a', 0, 1587043792, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (18, 1, 102, '13758787011', 'pbkdf2:sha256:150000$RtZqKtDN$fd2cb930047b2e934a1c65198ab213f79d3fef99f5670e9344e133eee7956e69', 0, 1588134197, 1592288770, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (19, 31, 100, 'Allen1D', 'pbkdf2:sha256:150000$vV7OHnCT$dbb29421d70d1d831c1bd12106ce95c026c143772b45a598f4f0ecc732070c69', 1, 1588134674, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (20, 31, 102, '13758787111', 'pbkdf2:sha256:150000$MIOWaCVV$3ac3e942c60dfa1ecf10bc5b102c396edadf79900b54b457e71709e50147ff33', 0, 1588134675, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (21, 31, 101, '111@qq.com', 'pbkdf2:sha256:150000$9AM9MtIo$487496f19fefe828b62e5297f42165637334e14fade766a36cf95e19cd13f3d8', 0, 1588134675, null, null);
-INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (24, 1, 100, 'Boss', 'pbkdf2:sha256:150000$pFccHtr1$3d6a5dd99315504c63033347c476ff67d0905b8cc77591616ea75ae89099b366', 0, 1588140875, 1592288770, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (3, 1, 101, '999@qq.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1586767003, 1592288770, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (4, 3, 100, 'Allen7D', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1586767003, 1587019825, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (5, 3, 102, '13758787058', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1586767003, 1587102577, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (7, 2, 101, '777@qq.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1586767003, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (8, 27, 100, 'Allen2D', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1587024948, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (9, 27, 102, '13755555555', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1587024948, 1587029097, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (10, 27, 101, '555@qq.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1587024956, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (14, 30, 100, 'Allen3D', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1587043791, 1587043791, 1587043791);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (15, 30, 102, '13758787053', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1587043792, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (18, 1, 102, '19900000001', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1588134197, 1592288770, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (19, 31, 100, 'user', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, 1588134674, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (20, 31, 102, '19900000003', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1588134675, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (21, 31, 101, '111@qq.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1588134675, null, null);
+INSERT INTO zerd.identity (id, user_id, type, identifier, credential, verified, create_time, update_time, delete_time) VALUES (24, 1, 100, 'super', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 0, 1588140875, 1592288770, null);
 create table image
 (
     id          int auto_increment
@@ -1063,7 +1063,7 @@ create table user
 create index id
     on user (id);
 
-INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (1, 'Boss', 2, 1, 'http://abc/xzy.jpg', null, 1588138125, 1592674088, null);
+INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (1, 'super', 2, 1, 'http://abc/xzy.jpg', null, 1588138125, 1592674088, null);
 INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (2, '小叶', 1, 1, null, null, null, 1592674088, null);
 INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (3, '小董', 1, 1, null, null, 1587102577, 1592674088, null);
 INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (4, 'Allen7D', 1, 1, null, null, null, 1592879250, null);
@@ -1071,7 +1071,7 @@ INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time
 INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (25, 'Allen8D', 1, 2, null, null, null, null, null);
 INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (27, '笑呵呵', 1, 3, null, null, 1587024920, 1587029097, null);
 INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (30, '宋仁投', 1, 6, null, null, 1587043791, 1588686249, null);
-INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (31, 'Allen1D', 1, 6, null, null, 1588134674, 1588686249, null);
+INSERT INTO zerd.user (id, nickname, auth, group_id, avatar, extend, create_time, update_time, delete_time) VALUES (31, 'user', 1, 6, null, null, 1588134674, 1588686249, null);
 
 
 

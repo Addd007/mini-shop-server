@@ -22,6 +22,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Optional
 
+import subprocess
+import sys
+
 import allure
 import pytest
 
@@ -83,15 +86,23 @@ def _has_error(resp_json: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 ALL_CASES = _load_cases()
-LOGIN_SUCCESS_CASES = _filter_by_tag(ALL_CASES, "login_success")   # TC-AUTH-001 ~ 010
-LOGIN_FAILURE_CASES = _filter_by_tag(ALL_CASES, "login_failure")   # TC-AUTH-011 ~ 016
-VALIDATION_CASES = _filter_by_tag(ALL_CASES, "validation")         # TC-AUTH-018 ~ 020
-TOKEN_VERIFY_CASES = _filter_by_tag(ALL_CASES, "token_verify")     # TC-AUTH-021 ~ 023
+LOGIN_SUCCESS_CASES = _filter_by_tag(ALL_CASES, "login_success")   # TC-AUTH-001 ~ 007
+LOGIN_FAILURE_CASES = _filter_by_tag(ALL_CASES, "login_failure")   # TC-AUTH-008 ~ 014
+VALIDATION_CASES = _filter_by_tag(ALL_CASES, "validation")         # TC-AUTH-015 ~ 017
+TOKEN_VERIFY_CASES = _filter_by_tag(ALL_CASES, "token_verify")     # TC-AUTH-018 ~ 020
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="session", autouse=True)
+def initialize_test_data():
+    subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"],
+        check=True,
+    )
+
 
 @pytest.fixture(scope="module")
 def client(base_url, timeout) -> ApiClient:
@@ -107,7 +118,7 @@ def client(base_url, timeout) -> ApiClient:
 def valid_token(client: ApiClient) -> str:
     """
     预先登录超级管理员，获取一个有效 token。
-    用于 TC-AUTH-023（有效 Token 校验）的前置依赖。
+    用于 token_verify 中有效 token 用例的前置依赖。
     如果登录失败则跳过依赖此 fixture 的所有用例。
     """
     resp = client.request("POST", "/v1/token", json={
@@ -159,7 +170,7 @@ def _attach_case(case: dict, resp: Any, request_payload: Any = None) -> None:
 
 
 # ===========================================================================
-# 测试函数：登录成功 (TC-AUTH-001 ~ TC-AUTH-010)
+# 测试函数：登录成功 (TC-AUTH-001 ~ TC-AUTH-007)
 # 验证点：HTTP 200 + 响应中包含有效 token
 # ===========================================================================
 
@@ -191,7 +202,7 @@ def test_login_success(client: ApiClient, case: dict):
 
 
 # ===========================================================================
-# 测试函数：登录失败 (TC-AUTH-011 ~ TC-AUTH-016)
+# 测试函数：登录失败 (TC-AUTH-008 ~ TC-AUTH-014)
 # 验证点：返回业务错误（error_code != 0 或 HTTP 4xx）且不返回 token
 # ===========================================================================
 
@@ -228,7 +239,7 @@ def test_login_failure(client: ApiClient, case: dict):
 
 
 # ===========================================================================
-# 测试函数：参数校验 (TC-AUTH-018 ~ TC-AUTH-020)
+# 测试函数：参数校验 (TC-AUTH-015 ~ TC-AUTH-017)
 # 验证点：缺失/空值参数应被拦截，返回错误且不返回 token
 # ===========================================================================
 
@@ -265,15 +276,15 @@ def test_param_validation(client: ApiClient, case: dict):
 
 
 # ===========================================================================
-# 测试函数：Token 校验失败 (TC-AUTH-021, TC-AUTH-022)
+# 测试函数：Token 校验失败 (TC-AUTH-018 ~ TC-AUTH-019)
 # 验证点：空 token / 伪造 token 应被拒绝
 # ===========================================================================
 
 @pytest.mark.auth
 @pytest.mark.parametrize(
     "case",
-    [c for c in TOKEN_VERIFY_CASES if c["id"] != "TC-AUTH-023"],
-    ids=[c["id"] for c in TOKEN_VERIFY_CASES if c["id"] != "TC-AUTH-023"],
+    [c for c in TOKEN_VERIFY_CASES if c["id"] != "TC-AUTH-019"],
+    ids=[c["id"] for c in TOKEN_VERIFY_CASES if c["id"] != "TC-AUTH-019"],
 )
 def test_token_verify_failure(client: ApiClient, case: dict):
     allure.dynamic.title(f"Token 校验失败 - {case['id']}")
@@ -297,16 +308,16 @@ def test_token_verify_failure(client: ApiClient, case: dict):
 
 
 # ===========================================================================
-# 测试函数：Token 校验成功 (TC-AUTH-023)
+# 测试函数：Token 校验成功 (TC-AUTH-020)
 # 验证点：有效 token 应通过校验，返回 error_code=0
 # 依赖 valid_token fixture 提供真实 token
 # ===========================================================================
 
 @pytest.mark.auth
 def test_token_verify_success(client: ApiClient, valid_token: str):
-    case = next((c for c in TOKEN_VERIFY_CASES if c["id"] == "TC-AUTH-023"), None)
+    case = next((c for c in TOKEN_VERIFY_CASES if c["id"] == "TC-AUTH-020"), None)
     if not case:
-        pytest.skip("未找到 TC-AUTH-023 用例")
+        pytest.skip("未找到 TC-AUTH-020 用例")
 
     allure.dynamic.title(f"Token 校验成功 - {case['id']}")
     allure.dynamic.feature("登录与鉴权")
