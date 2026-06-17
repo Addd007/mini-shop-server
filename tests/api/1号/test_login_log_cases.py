@@ -37,25 +37,30 @@ CASE_FILE = "cases/1号/login_log.yaml"
 
 
 def _load_cases() -> list[dict[str, Any]]:
+    """从 YAML 文件加载全部测试用例。"""
     loader = CaseLoader(Path(__file__).resolve().parents[2])
     return loader.load(CASE_FILE)
 
 
 def _filter_by_tag(cases: list[dict], tag: str) -> list[dict]:
+    """按 tag 字段过滤用例。"""
     return [c for c in cases if c.get("tag") == tag]
 
 
 def _extract_token(resp_json: dict) -> str | None:
+    """从响应 JSON 中提取 token。"""
     return resp_json.get("token") or resp_json.get("data", {}).get("token")
 
 
 def _has_error(resp_json: dict) -> bool:
+    """判断响应 JSON 是否包含业务错误。"""
     error_code = resp_json.get("error_code", resp_json.get("code"))
     return error_code is not None and error_code != 0
 
 
 @pytest.fixture(scope="module", autouse=True)
 def initialize_test_data():
+    """每轮测试前后重建登录日志测试数据。"""
     subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "login_log"], check=True)
     yield
     subprocess.run([sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "login_log"], check=True)
@@ -94,12 +99,14 @@ def tokens(client: ApiClient) -> Dict[str, str]:
 
 
 def _get_auth_client(client: ApiClient, tokens: Dict[str, str], auth: str) -> ApiClient:
+    """根据 auth 字段返回带对应 token 的客户端。"""
     if auth == "none" or not auth:
         return ApiClient(base_url=client.base_url, timeout=client.timeout, token=None)
     return ApiClient(base_url=client.base_url, timeout=client.timeout, token=tokens.get(auth))
 
 
 def _execute_case(client: ApiClient, tokens: Dict[str, str], case: dict) -> Any:
+    """根据 YAML 用例字典构造并发送 HTTP 请求。"""
     auth_client = _get_auth_client(client, tokens, case.get("auth", "none"))
     return auth_client.request(
         method=case.get("method", "GET"),
@@ -111,6 +118,7 @@ def _execute_case(client: ApiClient, tokens: Dict[str, str], case: dict) -> Any:
 
 
 def _assert_error_response(case: dict, resp, body: dict):
+    """断言错误响应。"""
     if resp.status_code == 200:
         assert _has_error(body), f"[{case['id']}] 业务应返回非零 error_code: {body}"
     else:
@@ -120,6 +128,7 @@ def _assert_error_response(case: dict, resp, body: dict):
 
 
 def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """执行单条登录日志用例并附加 Allure 结果。"""
     allure.dynamic.title(f"登录日志接口 - {case['id']}")
     allure.dynamic.feature("登录日志管理")
     allure.dynamic.story(case.get("tag", "登录日志用例"))
@@ -132,6 +141,7 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_LIST_CASES, ids=[c["id"] for c in LOGIN_LOG_LIST_CASES])
 def test_login_log_list(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """登录日志列表：验证分页、筛选与权限控制。"""
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -148,6 +158,7 @@ def test_login_log_list(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_DETAIL_CASES, ids=[c["id"] for c in LOGIN_LOG_DETAIL_CASES])
 def test_login_log_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """登录日志详情：验证日志明细查询能力。"""
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -164,6 +175,7 @@ def test_login_log_detail(client: ApiClient, tokens: Dict[str, str], case: dict)
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_DELETE_CASES, ids=[c["id"] for c in LOGIN_LOG_DELETE_CASES])
 def test_login_log_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """删除登录日志：验证单条日志删除能力。"""
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -180,6 +192,7 @@ def test_login_log_delete(client: ApiClient, tokens: Dict[str, str], case: dict)
 @pytest.mark.login_log
 @pytest.mark.parametrize("case", LOGIN_LOG_CLEAR_CASES, ids=[c["id"] for c in LOGIN_LOG_CLEAR_CASES])
 def test_login_log_clear(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """清空登录日志：验证批量清理能力。"""
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 

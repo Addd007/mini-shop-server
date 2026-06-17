@@ -34,25 +34,30 @@ CASE_FILE = "cases/1号/order_cases.yaml"
 
 
 def _load_cases() -> list[dict[str, Any]]:
+    """从 YAML 文件加载全部测试用例。"""
     loader = CaseLoader(Path(__file__).resolve().parents[2])
     return loader.load(CASE_FILE)
 
 
 def _filter_by_tag(cases: list[dict], tag: str) -> list[dict]:
+    """按 tag 字段过滤用例。"""
     return [case for case in cases if case.get("tag") == tag]
 
 
 def _extract_token(resp_json: dict) -> str | None:
+    """从响应 JSON 中提取 token。"""
     return resp_json.get("token") or resp_json.get("data", {}).get("token")
 
 
 def _has_error(resp_json: dict) -> bool:
+    """判断响应 JSON 是否包含业务错误。"""
     error_code = resp_json.get("error_code", resp_json.get("code"))
     return error_code is not None and error_code != 0
 
 
 @pytest.fixture(scope="module", autouse=True)
 def initialize_test_data():
+    """每轮测试前后重建订单相关测试数据。"""
     subprocess.run(
         [sys.executable, str(Path(__file__).resolve().parents[3] / "fake.py"), "--scope", "users"],
         check=True,
@@ -92,12 +97,14 @@ def tokens(client: ApiClient) -> Dict[str, str]:
 
 
 def _get_auth_client(client: ApiClient, tokens: Dict[str, str], auth: str) -> ApiClient:
+    """根据 auth 字段返回带对应 token 的客户端。"""
     if auth == "none" or not auth:
         return ApiClient(base_url=client.base_url, timeout=client.timeout, token=None)
     return ApiClient(base_url=client.base_url, timeout=client.timeout, token=tokens.get(auth))
 
 
 def _execute_case(client: ApiClient, tokens: Dict[str, str], case: dict) -> Any:
+    """根据 YAML 用例字典构造并发送 HTTP 请求。"""
     auth_client = _get_auth_client(client, tokens, case.get("auth", "none"))
     return auth_client.request(
         method=case.get("method", "GET"),
@@ -109,6 +116,7 @@ def _execute_case(client: ApiClient, tokens: Dict[str, str], case: dict) -> Any:
 
 
 def _assert_error_response(case: dict, resp, body: dict):
+    """断言错误响应。"""
     if resp.status_code == 200:
         assert _has_error(body), f"[{case['id']}] 业务应返回非零 error_code: {body}"
     else:
@@ -120,6 +128,7 @@ def _assert_error_response(case: dict, resp, body: dict):
 @pytest.mark.order
 @pytest.mark.parametrize("case", ORDER_PLACE_CASES, ids=[c["id"] for c in ORDER_PLACE_CASES])
 def test_order_place(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """订单提交：验证下单、库存校验与订单快照生成。"""
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -134,6 +143,7 @@ def test_order_place(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.order
 @pytest.mark.parametrize("case", ORDER_LIST_CASES, ids=[c["id"] for c in ORDER_LIST_CASES])
 def test_order_list(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """订单列表：验证用户订单查询与后台检索能力。"""
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -148,6 +158,7 @@ def test_order_list(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.order
 @pytest.mark.parametrize("case", ORDER_DETAIL_CASES, ids=[c["id"] for c in ORDER_DETAIL_CASES])
 def test_order_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
+    """订单详情：验证单笔订单明细与快照信息展示。"""
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
