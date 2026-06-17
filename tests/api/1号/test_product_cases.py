@@ -123,6 +123,16 @@ def _attach_case(case: dict, resp: Any, request_payload: Any = None) -> None:
     attach_request_response(payload, resp)
 
 
+def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
+    allure.dynamic.title(f"商品接口 - {case['id']}")
+    allure.dynamic.feature("商品管理")
+    allure.dynamic.story(case.get("tag", "商品用例"))
+    resp = _execute_case(client, tokens, case)
+    body = resp.json()
+    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
+    return resp, body
+
+
 def _assert_error_response(case: dict, resp, body: dict):
     if resp.status_code == 200 or resp.status_code == 201:
         assert _has_error(body), f"[{case['id']}] 业务应返回非零 error_code: {body}"
@@ -135,13 +145,9 @@ def _assert_error_response(case: dict, resp, body: dict):
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_RECENT_CASES, ids=[c["id"] for c in PRODUCT_RECENT_CASES])
 def test_product_recent(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"最近商品查询 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("最近商品查询")
-    resp = _execute_case(client, tokens, case)
+    _skip_if_marked(case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -155,13 +161,9 @@ def test_product_recent(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_DETAIL_CASES, ids=[c["id"] for c in PRODUCT_DETAIL_CASES])
 def test_product_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"商品详情查询 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("商品详情查询")
-    resp = _execute_case(client, tokens, case)
+    _skip_if_marked(case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -175,13 +177,9 @@ def test_product_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_LIST_CATEGORY_CASES, ids=[c["id"] for c in PRODUCT_LIST_CATEGORY_CASES])
 def test_product_list_by_category(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"按分类查询商品列表 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("按分类查询商品列表")
-    resp = _execute_case(client, tokens, case)
+    _skip_if_marked(case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -195,13 +193,9 @@ def test_product_list_by_category(client: ApiClient, tokens: Dict[str, str], cas
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_ALL_CATEGORY_CASES, ids=[c["id"] for c in PRODUCT_ALL_CATEGORY_CASES])
 def test_product_all_by_category(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"分类下所有商品 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("分类下所有商品")
-    resp = _execute_case(client, tokens, case)
+    _skip_if_marked(case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -215,14 +209,9 @@ def test_product_all_by_category(client: ApiClient, tokens: Dict[str, str], case
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_CREATE_CASES, ids=[c["id"] for c in PRODUCT_CREATE_CASES])
 def test_product_create(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"商品新增 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("商品新增")
     _skip_if_marked(case)
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -236,14 +225,9 @@ def test_product_create(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_UPDATE_CASES, ids=[c["id"] for c in PRODUCT_UPDATE_CASES])
 def test_product_update(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"商品更新 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("商品更新")
     _skip_if_marked(case)
-    resp = _execute_case(client, tokens, case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -257,13 +241,9 @@ def test_product_update(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_DELETE_CASES, ids=[c["id"] for c in PRODUCT_DELETE_CASES])
 def test_product_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"商品删除 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("商品删除")
-    resp = _execute_case(client, tokens, case)
+    _skip_if_marked(case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
@@ -277,13 +257,9 @@ def test_product_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.product
 @pytest.mark.parametrize("case", PRODUCT_REORDER_CASES, ids=[c["id"] for c in PRODUCT_REORDER_CASES])
 def test_product_reorder(client: ApiClient, tokens: Dict[str, str], case: dict):
-    allure.dynamic.title(f"商品图片排序 - {case['id']}")
-    allure.dynamic.feature("商品管理")
-    allure.dynamic.story("商品图片排序")
-    resp = _execute_case(client, tokens, case)
+    _skip_if_marked(case)
+    resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
-    body = resp.json()
-    _attach_case(case, resp, request_payload=case.get("json") or case.get("params"))
     if "status_code" in expected:
         with allure.step("校验 HTTP 状态码"):
             assert resp.status_code == expected["status_code"], (
