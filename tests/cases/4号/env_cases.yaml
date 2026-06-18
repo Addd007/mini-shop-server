@@ -1,0 +1,62 @@
+# 环境变量切换 — 4号专项
+
+# ======================== DEBUG 模式检查 ========================
+
+- id: TC-ENV-001
+  summary: DEBUG 模式确认
+  tag: env
+  priority: P1
+  method: GET
+  path: /cms/file/types
+  expected:
+    status_code: 200
+  check_debug_mode: true
+
+# ======================== 服务端 URL 配置 ========================
+
+- id: TC-ENV-002
+  summary: 验证服务端 URL 配置
+  tag: env
+  priority: P2
+  method: GET
+  path: /apispec_1.json
+  no_auth: true
+  expected:
+    status_code: 200
+  check_host: true
+
+# ======================== 应用版本信息 ========================
+
+- id: TC-ENV-003
+  summary: 验证 Flask 应用版本信息
+  tag: env
+  priority: P2
+  method: GET
+  path: /health
+  no_auth: true
+  expected:
+    status_code: 200
+
+# ======================== 数据库连接验证 ========================
+
+- id: TC-ENV-004
+  summary: 验证数据库连接正常（通过间接查询）
+  tag: env
+  priority: P1
+  method: GET
+  path: /cms/file/types
+  expected:
+    status_code: 200
+
+# ======================== 敏感信息泄露检查 ========================
+
+- id: TC-ENV-005
+  summary: 验证响应头无敏感信息泄露
+  tag: env
+  priority: P1
+  method: GET
+  path: /health
+  no_auth: true
+  check_no_server_header: true
+  expected:
+    status_code: 200

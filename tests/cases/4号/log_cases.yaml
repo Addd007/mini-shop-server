@@ -1,0 +1,142 @@
+# 日志审计测试用例 — 4号专项
+# 基于 app/api/cms/login_log.py, oper_log.py, error_log.py
+
+# ======================== 登录日志 ========================
+
+- id: TC-LOG-001
+  summary: 查询登录日志列表
+  tag: login_log
+  priority: P0
+  method: GET
+  path: /cms/log/login/list
+  expected:
+    status_code: 200
+    json:
+      error_code: 0
+
+- id: TC-LOG-002
+  summary: 查询登录日志列表（带时间筛选）
+  tag: login_log
+  priority: P1
+  method: GET
+  path: /cms/log/login/list
+  params:
+    start: "{yesterday}"
+    end: "{today}"
+  expected:
+    status_code: 200
+    json:
+      error_code: 0
+
+- id: TC-LOG-003
+  summary: 无 Token 访问登录日志
+  tag: login_log
+  priority: P0
+  method: GET
+  path: /cms/log/login/list
+  no_auth: true
+  expected:
+    error: true
+
+# ======================== 操作日志 ========================
+
+- id: TC-LOG-004
+  summary: 搜索操作日志
+  tag: oper_log
+  priority: P0
+  method: GET
+  path: /cms/log/oper/list/search
+  expected:
+    status_code: 200
+    json:
+      error_code: 0
+
+- id: TC-LOG-005
+  summary: 搜索操作日志（按用户名筛选）
+  tag: oper_log
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  params:
+    username: super
+  expected:
+    status_code: 200
+    json:
+      error_code: 0
+
+- id: TC-LOG-006
+  summary: 搜索操作日志（按关键词筛选）
+  tag: oper_log
+  priority: P2
+  method: GET
+  path: /cms/log/oper/list/search
+  params:
+    keyword: 文件
+  expected:
+    status_code: 200
+    json:
+      error_code: 0
+
+- id: TC-LOG-007
+  summary: 查询操作日志的用户列表
+  tag: oper_log
+  priority: P1
+  method: GET
+  path: /cms/log/oper/user/list
+  expected:
+    status_code: 200
+
+- id: TC-LOG-008
+  summary: 无 Token 访问操作日志
+  tag: oper_log
+  priority: P0
+  method: GET
+  path: /cms/log/oper/list/search
+  no_auth: true
+  expected:
+    error: true
+
+# ======================== 异常日志 ========================
+
+- id: TC-LOG-009
+  summary: 查询异常日志列表
+  tag: error_log
+  priority: P1
+  method: GET
+  path: /cms/log/error/list
+  expected:
+    status_code: 200
+    json:
+      error_code: 0
+
+# ======================== 日志记录验证 ========================
+
+- id: TC-LOG-010
+  summary: 登录后产生登录日志记录
+  tag: log_audit
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: super
+    secret: "123456"
+    type: 100
+  expected:
+    status_code: 200
+    has_token: true
+  check_login_log: true
+
+- id: TC-LOG-011
+  summary: 密码错误不产生成功登录日志
+  tag: log_audit
+  priority: P0
+  method: POST
+  path: /v1/token
+  json:
+    account: super
+    secret: wrongpassword
+    type: 100
+  expected:
+    has_token: false
+    error: true
+  check_login_log_fail: true

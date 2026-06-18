@@ -1,0 +1,69 @@
+# 性能抽测 — 4号专项
+
+# ======================== 单接口响应时间 ========================
+
+- id: TC-PERF-001
+  summary: 简单接口响应时间（文件类型查询）
+  tag: perf
+  priority: P2
+  method: GET
+  path: /cms/file/types
+  expected:
+    status_code: 200
+  check_response_time: true
+  max_response_ms: 500
+
+- id: TC-PERF-002
+  summary: 登录接口响应时间
+  tag: perf
+  priority: P2
+  method: POST
+  path: /v1/token
+  json:
+    account: super
+    secret: "123456"
+    type: 100
+  expected:
+    status_code: 200
+  check_response_time: true
+  max_response_ms: 1000
+
+- id: TC-PERF-003
+  summary: Swagger JSON 获取响应时间
+  tag: perf
+  priority: P2
+  method: GET
+  path: /apispec_1.json
+  no_auth: true
+  expected:
+    status_code: 200
+  check_response_time: true
+  max_response_ms: 3000
+
+# ======================== 并发性能测试 ========================
+
+- id: TC-PERF-004
+  summary: 并发登录测试（10并发）
+  tag: perf_concurrent
+  priority: P2
+  method: POST
+  path: /v1/token
+  json:
+    account: super
+    secret: "123456"
+    type: 100
+  concurrent: 10
+  expected:
+    success_rate: 0.9
+    max_avg_ms: 2000
+
+- id: TC-PERF-005
+  summary: 并发查询测试（20并发）
+  tag: perf_concurrent
+  priority: P2
+  method: GET
+  path: /cms/file/types
+  concurrent: 20
+  expected:
+    success_rate: 0.95
+    max_avg_ms: 1000
