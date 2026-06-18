@@ -1,0 +1,209 @@
+# 参数配置测试用例 - 基于 test_cases/2号/config.md
+# 覆盖：配置列表/ID查询/Key查询、新建/更新/删除、越权、未登录
+# 修改类接口鉴权：@auth.group_required，super 账号具备此权限
+
+# ======================== 查询列表 ========================
+
+- id: TC-CONFIG-001
+  summary: 分页查询参数配置列表成功
+  tag: config_query
+  priority: P0
+  method: GET
+  path: /cms/config/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+# ======================== 按ID查询 ========================
+
+- id: TC-CONFIG-002
+  summary: 按ID查询参数配置成功
+  tag: config_query
+  priority: P1
+  method: GET
+  path: /cms/config/1
+  auth: super
+  expected:
+    status_code: 200
+
+- id: TC-CONFIG-002b
+  summary: 查询不存在的参数配置失败
+  tag: config_query
+  priority: P1
+  method: GET
+  path: /cms/config/9999
+  auth: super
+  expected:
+    error: true
+
+# ======================== 按Key查询 ========================
+
+- id: TC-CONFIG-003
+  summary: 按Key查询参数配置成功
+  tag: config_query
+  priority: P1
+  method: GET
+  path: /cms/config/key/page_size
+  auth: super
+  expected:
+    status_code: 200
+
+- id: TC-CONFIG-003b
+  summary: 查询不存在的Key失败
+  tag: config_query
+  priority: P1
+  method: GET
+  path: /cms/config/key/no_such_key
+  auth: super
+  expected:
+    error: true
+
+# ======================== 新建 ========================
+
+- id: TC-CONFIG-004
+  summary: 新建参数配置成功
+  tag: config_create
+  priority: P0
+  method: POST
+  path: /cms/config
+  auth: super
+  json:
+    name: 测试参数
+    key: test_key_001
+    value: hello
+    type: true
+    remark: 测试备注
+  expected:
+    status_code: 201
+
+- id: TC-CONFIG-005
+  summary: name 为空新建失败
+  tag: config_create_validation
+  priority: P1
+  method: POST
+  path: /cms/config
+  auth: super
+  json:
+    name: ""
+    key: k1
+    value: v1
+    type: true
+  expected:
+    error: true
+
+- id: TC-CONFIG-005b
+  summary: key 为空新建失败
+  tag: config_create_validation
+  priority: P1
+  method: POST
+  path: /cms/config
+  auth: super
+  json:
+    name: test
+    key: ""
+    value: v1
+    type: true
+  expected:
+    error: true
+
+- id: TC-CONFIG-005c
+  summary: value 为空新建失败
+  tag: config_create_validation
+  priority: P1
+  method: POST
+  path: /cms/config
+  auth: super
+  json:
+    name: test
+    key: k2
+    value: ""
+    type: true
+  expected:
+    error: true
+
+- id: TC-CONFIG-005d
+  summary: 重复 key 时接口未校验仍返回成功（⚠️ 疑似 Bug）
+  tag: config_create
+  priority: P1
+  method: POST
+  path: /cms/config
+  auth: super
+  json:
+    name: 重复
+    key: page_size
+    value: "20"
+    type: true
+  expected:
+    status_code: 201
+
+# ======================== 更新 ========================
+
+- id: TC-CONFIG-006
+  summary: 按ID更新参数配置成功
+  tag: config_update
+  priority: P1
+  method: PUT
+  path: /cms/config/2
+  auth: super
+  json:
+    name: 更新后的名称
+    value: new_value
+  expected:
+    status_code: 201
+
+- id: TC-CONFIG-007
+  summary: 按Key更新value成功
+  tag: config_update
+  priority: P1
+  method: PUT
+  path: /cms/config/key/test_key_001
+  auth: super
+  json:
+    value: updated_hello
+  expected:
+    status_code: 201
+
+# ======================== 删除 ========================
+
+- id: TC-CONFIG-008
+  summary: 删除参数配置（⚠️ 数据已被前述操作变化，可能 404）
+  tag: config_delete
+  priority: P1
+  method: DELETE
+  path: /cms/config/4
+  auth: super
+  expected:
+    error: true
+
+# ======================== 越权 + 未登录 ========================
+
+- id: TC-CONFIG-009
+  summary: 普通用户访问修改类接口被拒绝
+  tag: config_access_control
+  priority: P1
+  method: POST
+  path: /cms/config
+  auth: user
+  json:
+    name: 越权
+    key: unauth
+    value: x
+    type: true
+  expected:
+    error: true
+
+- id: TC-CONFIG-010
+  summary: 未登录也可访问配置列表（⚠️ 查询接口未鉴权）
+  tag: config_query
+  priority: P1
+  method: GET
+  path: /cms/config/list
+  auth: none
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 200

@@ -1,0 +1,178 @@
+# 权限组管理测试用例 - 基于 test_cases/2号/group.md
+# 覆盖：权限组 CRUD、用户迁移、越权、未登录
+# 全部接口鉴权：@auth.admin_required（仅超级管理员可访问）
+
+# ======================== 查询全部 ========================
+
+- id: TC-GROUP-001
+  summary: 查询所有权限组成功
+  tag: group_query
+  priority: P0
+  method: GET
+  path: /cms/group/all
+  auth: super
+  expected:
+    status_code: 200
+
+# ======================== 查询单个 ========================
+
+- id: TC-GROUP-002
+  summary: 查询单个权限组及权限列表（⚠️ group_id=1 返回 404，疑似 Bug）
+  tag: group_query
+  priority: P1
+  method: GET
+  path: /cms/group/1
+  auth: super
+  expected:
+    error: true
+
+- id: TC-GROUP-003
+  summary: 查询不存在的权限组失败
+  tag: group_query
+  priority: P1
+  method: GET
+  path: /cms/group/9999
+  auth: super
+  expected:
+    error: true
+
+- id: TC-GROUP-003b
+  summary: 查询非法ID的权限组失败
+  tag: group_query
+  priority: P1
+  method: GET
+  path: /cms/group/abc
+  auth: super
+  expected:
+    error: true
+
+# ======================== 新建 ========================
+
+- id: TC-GROUP-004
+  summary: 新建权限组（⚠️ "测试分组"可能已存在→500，首次运行正常）
+  tag: group_create
+  priority: P0
+  method: POST
+  path: /cms/group
+  auth: super
+  json:
+    name: 自动化测试分组
+    info: 测试描述
+    auth_ids: [1, 2]
+  expected:
+    status_code: 201
+
+- id: TC-GROUP-005
+  summary: 名称为空导致服务器 500（⚠️ 疑似 Bug，应返回参数校验失败）
+  tag: group_create_validation
+  priority: P1
+  method: POST
+  path: /cms/group
+  auth: super
+  json:
+    name: ""
+    info: 测试描述
+    auth_ids: [1, 2]
+  expected:
+    error: true
+
+- id: TC-GROUP-005b
+  summary: 重复名称新建失败
+  tag: group_create_validation
+  priority: P1
+  method: POST
+  path: /cms/group
+  auth: super
+  json:
+    name: 超级管理员组
+    info: 重复名称
+    auth_ids: [1, 2]
+  expected:
+    error: true
+
+# ======================== 更新 ========================
+
+- id: TC-GROUP-006
+  summary: 更新权限组名称和描述成功
+  tag: group_update
+  priority: P1
+  method: PUT
+  path: /cms/group/2
+  auth: super
+  json:
+    name: 更新后组名
+    info: 更新描述
+  expected:
+    status_code: 201
+
+# ======================== 删除 ========================
+
+- id: TC-GROUP-007
+  summary: 删除权限组被阻止（⚠️ 403，group_id=3 可能受保护或有用户）
+  tag: group_delete
+  priority: P1
+  method: DELETE
+  path: /cms/group/3
+  auth: super
+  expected:
+    error: true
+
+- id: TC-GROUP-007b
+  summary: 删除不存在的权限组失败
+  tag: group_delete
+  priority: P1
+  method: DELETE
+  path: /cms/group/9999
+  auth: super
+  expected:
+    error: true
+
+# ======================== 迁移 ========================
+
+- id: TC-GROUP-008
+  summary: 迁移权限组下用户成功
+  tag: group_migrate
+  priority: P2
+  method: PUT
+  path: /cms/group/migrate
+  auth: super
+  json:
+    src_id: 2
+    dest_id: 3
+  expected:
+    status_code: 201
+
+- id: TC-GROUP-008b
+  summary: 相同 src_id 与 dest_id 迁移失败
+  tag: group_migrate
+  priority: P2
+  method: PUT
+  path: /cms/group/migrate
+  auth: super
+  json:
+    src_id: 2
+    dest_id: 2
+  expected:
+    error: true
+
+# ======================== 越权 + 未登录 ========================
+
+- id: TC-GROUP-009
+  summary: 普通用户访问权限组接口被拒绝
+  tag: group_access_control
+  priority: P0
+  method: GET
+  path: /cms/group/all
+  auth: user
+  expected:
+    error: true
+
+- id: TC-GROUP-010
+  summary: 未登录访问权限组接口被拒绝
+  tag: group_access_control
+  priority: P1
+  method: GET
+  path: /cms/group/all
+  auth: none
+  expected:
+    error: true

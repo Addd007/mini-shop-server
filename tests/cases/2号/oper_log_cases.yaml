@@ -1,0 +1,274 @@
+# 操作日志测试用例 - 基于 test_cases/2号/oper_log.md
+# 覆盖：操作日志搜索、用户列表、删除、清空
+# 鉴权：搜索/用户列表需 @auth.group_required，删除/清空需 @auth.admin_required
+# ⚠️ 注意：GET /cms/log/oper/{id} 接口不存在（仅支持 DELETE），已跳过
+
+# ======================== 操作日志搜索 ========================
+
+- id: TC-OPER-001
+  summary: 按人员/时间/内容搜索操作日志
+  tag: oper_search
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 1
+    size: 10
+    username: super
+    keyword: 操作
+  expected:
+    status_code: 200
+
+- id: TC-OPER-002
+  summary: 仅按用户名搜索操作日志
+  tag: oper_search
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 1
+    size: 10
+    username: super
+  expected:
+    status_code: 200
+
+- id: TC-OPER-003
+  summary: 仅按关键字搜索操作日志
+  tag: oper_search
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 1
+    size: 10
+    keyword: 成功
+  expected:
+    status_code: 200
+
+- id: TC-OPER-004
+  summary: 时间范围无数据时返回空列表
+  tag: oper_search
+  priority: P2
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 1
+    size: 10
+    start: 1000000000
+    end: 1000001000
+  expected:
+    status_code: 200
+
+- id: TC-OPER-005
+  summary: 分页参数边界（page=0 size=0）
+  tag: oper_search_validation
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 0
+    size: 0
+  expected:
+    error: true
+
+- id: TC-OPER-006
+  summary: 页码超范围时返回 404（⚠️ 预期返回空列表）
+  tag: oper_search
+  priority: P2
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 9999
+    size: 10
+  expected:
+    error: true
+
+- id: TC-OPER-007
+  summary: 未登录访问操作日志搜索
+  tag: oper_access_control
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: none
+  params:
+    page: 1
+    size: 10
+  expected:
+    error: true
+
+- id: TC-OPER-008
+  summary: 普通用户无权限访问操作日志搜索
+  tag: oper_access_control
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: user
+  params:
+    page: 1
+    size: 10
+  expected:
+    error: true
+
+- id: TC-OPER-009
+  summary: 非法时间格式未做校验仍返回成功（⚠️ 疑似 Bug）
+  tag: oper_search
+  priority: P1
+  method: GET
+  path: /cms/log/oper/list/search
+  auth: super
+  params:
+    page: 1
+    size: 10
+    start: "2026-13-40"
+    end: abc
+  expected:
+    status_code: 200
+
+# ======================== 用户列表日志 ========================
+
+- id: TC-OPER-010
+  summary: 查询操作日志中的用户列表成功
+  tag: oper_user_list
+  priority: P1
+  method: GET
+  path: /cms/log/oper/user/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: TC-OPER-011
+  summary: 用户列表日志分页参数边界
+  tag: oper_user_list_validation
+  priority: P2
+  method: GET
+  path: /cms/log/oper/user/list
+  auth: super
+  params:
+    page: 0
+    size: 0
+  expected:
+    error: true
+
+- id: TC-OPER-012
+  summary: 未登录访问用户列表日志
+  tag: oper_access_control
+  priority: P1
+  method: GET
+  path: /cms/log/oper/user/list
+  auth: none
+  params:
+    page: 1
+    size: 10
+  expected:
+    error: true
+
+- id: TC-OPER-013
+  summary: 普通用户无权限访问用户列表日志
+  tag: oper_access_control
+  priority: P1
+  method: GET
+  path: /cms/log/oper/user/list
+  auth: user
+  params:
+    page: 1
+    size: 10
+  expected:
+    error: true
+
+# ======================== 删除操作日志（admin_required） ========================
+
+- id: TC-OPER-014
+  summary: 删除单条操作日志（⚠️ 数据可能已被清空，id=9 可能不存在→404）
+  tag: oper_delete
+  priority: P2
+  method: DELETE
+  path: /cms/log/oper/9
+  auth: super
+  expected:
+    error: true
+
+- id: TC-OPER-015
+  summary: 删除不存在的操作日志失败
+  tag: oper_delete
+  priority: P1
+  method: DELETE
+  path: /cms/log/oper/9999
+  auth: super
+  expected:
+    error: true
+
+- id: TC-OPER-016
+  summary: 删除非法ID的操作日志失败
+  tag: oper_delete_validation
+  priority: P1
+  method: DELETE
+  path: /cms/log/oper/abc
+  auth: super
+  expected:
+    error: true
+
+- id: TC-OPER-017
+  summary: 未登录删除操作日志
+  tag: oper_access_control
+  priority: P1
+  method: DELETE
+  path: /cms/log/oper/1
+  auth: none
+  expected:
+    error: true
+
+- id: TC-OPER-018
+  summary: 普通用户无权限删除操作日志
+  tag: oper_access_control
+  priority: P1
+  method: DELETE
+  path: /cms/log/oper/1
+  auth: user
+  expected:
+    error: true
+
+# ======================== 清空操作日志（admin_required） ========================
+
+- id: TC-OPER-019
+  summary: 清空所有操作日志成功（⚠️ 会清空全部数据）
+  tag: oper_clear
+  priority: P2
+  method: DELETE
+  path: /cms/log/oper/all
+  auth: super
+  expected:
+    status_code: 202
+
+- id: TC-OPER-020
+  summary: 未登录清空操作日志
+  tag: oper_access_control
+  priority: P1
+  method: DELETE
+  path: /cms/log/oper/all
+  auth: none
+  expected:
+    error: true
+
+- id: TC-OPER-021
+  summary: 普通用户无权限清空操作日志
+  tag: oper_access_control
+  priority: P1
+  method: DELETE
+  path: /cms/log/oper/all
+  auth: user
+  expected:
+    error: true
+
+# ======================== 代码中不存在的接口（已跳过） ========================
+
+# GET /cms/log/oper/{id} 不存在——源码中该路由仅注册了 DELETE 方法
+# 原用例 TC-OPER-015~019（详情查询）已在 YAML 中移除

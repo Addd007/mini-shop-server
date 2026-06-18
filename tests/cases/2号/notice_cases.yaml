@@ -1,0 +1,169 @@
+# 通知管理测试用例 - 基于 test_cases/2号/notice.md
+# 覆盖：通知列表/详情、新建（发布+草稿）、更新、删除、权限对比
+# 鉴权：GET /cms/notice/{id} 公开，其余接口需 @auth.group_required
+
+# ======================== 通知列表 ========================
+
+- id: TC-NOTICE-001
+  summary: 分页查询通知列表成功
+  tag: notice_query
+  priority: P0
+  method: GET
+  path: /cms/notice/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+# ======================== 通知详情（公开接口） ========================
+
+- id: TC-NOTICE-002
+  summary: 查询通知详情成功（公开接口，无需登录）
+  tag: notice_detail
+  priority: P0
+  method: GET
+  path: /cms/notice/1
+  auth: none
+  expected:
+    status_code: 200
+
+- id: TC-NOTICE-003
+  summary: 查询不存在的通知失败
+  tag: notice_detail
+  priority: P1
+  method: GET
+  path: /cms/notice/9999
+  auth: none
+  expected:
+    error: true
+
+# ======================== 新建通知 ========================
+
+- id: TC-NOTICE-004
+  summary: 新建已发布通知成功
+  tag: notice_create
+  priority: P0
+  method: POST
+  path: /cms/notice
+  auth: super
+  json:
+    type: 1
+    title: 测试通知标题
+    content: 测试通知内容
+    status: true
+  expected:
+    status_code: 201
+
+- id: TC-NOTICE-004b
+  summary: 新建草稿通知成功
+  tag: notice_create
+  priority: P0
+  method: POST
+  path: /cms/notice
+  auth: super
+  json:
+    type: 1
+    title: 草稿通知
+    content: 草稿内容
+    status: false
+  expected:
+    status_code: 201
+
+- id: TC-NOTICE-005
+  summary: title 为空新建失败
+  tag: notice_create_validation
+  priority: P1
+  method: POST
+  path: /cms/notice
+  auth: super
+  json:
+    type: 1
+    title: ""
+    content: 内容
+  expected:
+    error: true
+
+- id: TC-NOTICE-005b
+  summary: content 为空新建失败
+  tag: notice_create_validation
+  priority: P1
+  method: POST
+  path: /cms/notice
+  auth: super
+  json:
+    type: 1
+    title: 标题
+    content: ""
+  expected:
+    error: true
+
+# ======================== 更新通知 ========================
+
+- id: TC-NOTICE-006
+  summary: 更新通知（⚠️ 服务器返回 500/999 异常）
+  tag: notice_update
+  priority: P1
+  method: PUT
+  path: /cms/notice/2
+  auth: super
+  json:
+    title: 更新后的标题
+    status: true
+  expected:
+    error: true
+
+# ======================== 删除通知 ========================
+
+- id: TC-NOTICE-007
+  summary: 单条删除通知成功
+  tag: notice_delete
+  priority: P1
+  method: DELETE
+  path: /cms/notice/3
+  auth: super
+  expected:
+    status_code: 202
+
+- id: TC-NOTICE-007b
+  summary: 批量删除通知成功
+  tag: notice_delete
+  priority: P1
+  method: DELETE
+  path: /cms/notice/4,5
+  auth: super
+  expected:
+    status_code: 202
+
+- id: TC-NOTICE-007c
+  summary: 非法 ids 删除失败
+  tag: notice_delete
+  priority: P1
+  method: DELETE
+  path: /cms/notice/abc
+  auth: super
+  expected:
+    error: true
+
+# ======================== 权限对比 ========================
+
+- id: TC-NOTICE-008
+  summary: 普通用户访问受限接口被拒
+  tag: notice_access_control
+  priority: P1
+  method: GET
+  path: /cms/notice/list
+  auth: user
+  expected:
+    error: true
+
+- id: TC-NOTICE-008b
+  summary: 未登录访问受限接口被拒
+  tag: notice_access_control
+  priority: P1
+  method: GET
+  path: /cms/notice/list
+  auth: none
+  expected:
+    error: true

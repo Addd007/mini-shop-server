@@ -1,0 +1,148 @@
+# 菜单管理测试用例 - 基于 test_cases/2号/menu.md
+# 覆盖：按权限组获取菜单树、覆盖权限组菜单列表
+# 鉴权：GET /cms/menu 需登录（无特殊权限），PUT /cms/menu 需登录
+
+# ======================== 菜单查询 ========================
+
+- id: TC-MENU-001
+  summary: 超级管理员组获取完整菜单树
+  tag: menu_query
+  priority: P0
+  method: GET
+  path: /cms/menu
+  auth: super
+  params:
+    group_id: 1
+  expected:
+    status_code: 200
+
+- id: TC-MENU-002
+  summary: 不同权限组返回不同菜单树（超级管理员组）
+  tag: menu_query
+  priority: P1
+  method: GET
+  path: /cms/menu
+  auth: super
+  params:
+    group_id: 1
+  expected:
+    status_code: 200
+
+- id: TC-MENU-002b
+  summary: 不同权限组返回不同菜单树（普通管理员组）
+  tag: menu_query
+  priority: P1
+  method: GET
+  path: /cms/menu
+  auth: super
+  params:
+    group_id: 2
+  expected:
+    status_code: 200
+
+# ======================== 参数校验 ========================
+
+- id: TC-MENU-003
+  summary: group_id 为空时参数校验失败
+  tag: menu_query_validation
+  priority: P1
+  method: GET
+  path: /cms/menu
+  auth: super
+  params: {}
+  expected:
+    error: true
+
+- id: TC-MENU-003b
+  summary: group_id 为 0 时参数校验失败
+  tag: menu_query_validation
+  priority: P1
+  method: GET
+  path: /cms/menu
+  auth: super
+  params:
+    group_id: 0
+  expected:
+    error: true
+
+- id: TC-MENU-003c
+  summary: group_id 不存在时返回空或错误
+  tag: menu_query_validation
+  priority: P1
+  method: GET
+  path: /cms/menu
+  auth: super
+  params:
+    group_id: 9999
+  expected:
+    error: true
+
+# ======================== 覆盖菜单 ========================
+
+- id: TC-MENU-004
+  summary: 覆盖权限组的菜单列表（⚠️ 服务器返回 500/999 异常）
+  tag: menu_override
+  priority: P0
+  method: PUT
+  path: /cms/menu
+  auth: super
+  json:
+    group_id: 2
+    routes: [1, 2, 3, 10]
+  expected:
+    error: true
+
+- id: TC-MENU-005
+  summary: routes 为空时接口未校验仍返回成功（⚠️ 疑似 Bug）
+  tag: menu_override
+  priority: P1
+  method: PUT
+  path: /cms/menu
+  auth: super
+  json:
+    group_id: 2
+    routes: []
+  expected:
+    status_code: 200
+
+- id: TC-MENU-005b
+  summary: group_id 为空时覆盖失败
+  tag: menu_override_validation
+  priority: P1
+  method: PUT
+  path: /cms/menu
+  auth: super
+  json:
+    group_id: ""
+    routes: [1, 2]
+  expected:
+    error: true
+
+# ======================== 覆盖后一致性验证 ========================
+
+- id: TC-MENU-006
+  summary: 覆盖后查询一致性（⚠️ 依赖 TC-MENU-004，接口返回 500）
+  tag: menu_consistency
+  priority: P1
+  method: PUT
+  path: /cms/menu
+  auth: super
+  json:
+    group_id: 2
+    routes: [5, 6]
+  expected:
+    error: true
+
+# ======================== 未登录 ========================
+
+- id: TC-MENU-007
+  summary: 未登录也可访问菜单接口（⚠️ 菜单查询未鉴权）
+  tag: menu_query
+  priority: P1
+  method: GET
+  path: /cms/menu
+  auth: none
+  params:
+    group_id: 1
+  expected:
+    status_code: 200

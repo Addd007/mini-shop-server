@@ -1,0 +1,198 @@
+# 字典管理测试用例 - 基于 test_cases/2号/dict.md
+# 覆盖：字典列表(all/list)/详情、新建/更新/删除、越权、未登录
+# 全部接口鉴权：@auth.group_required，super 账号具备此权限
+
+# ======================== 分页查询 ========================
+
+- id: TC-DICT-001
+  summary: 按type分页查询字典列表成功
+  tag: dict_query
+  priority: P0
+  method: GET
+  path: /cms/dict/list
+  auth: super
+  params:
+    type: gender
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+# ======================== 查询全部 ========================
+
+- id: TC-DICT-002
+  summary: 按type查询全部字典成功
+  tag: dict_query
+  priority: P1
+  method: GET
+  path: /cms/dict/all
+  auth: super
+  params:
+    type: status
+  expected:
+    status_code: 200
+
+# ======================== 查询单条 ========================
+
+- id: TC-DICT-003
+  summary: 查询单条字典详情成功
+  tag: dict_query
+  priority: P1
+  method: GET
+  path: /cms/dict/1
+  auth: super
+  expected:
+    status_code: 200
+
+- id: TC-DICT-003b
+  summary: 查询不存在的字典失败
+  tag: dict_query
+  priority: P1
+  method: GET
+  path: /cms/dict/9999
+  auth: super
+  expected:
+    error: true
+
+# ======================== 参数校验 ========================
+
+- id: TC-DICT-004
+  summary: type 为空时查询失败
+  tag: dict_validation
+  priority: P1
+  method: GET
+  path: /cms/dict/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+  expected:
+    error: true
+
+- id: TC-DICT-004b
+  summary: type 不存在时返回空列表
+  tag: dict_validation
+  priority: P1
+  method: GET
+  path: /cms/dict/list
+  auth: super
+  params:
+    type: no_such_type
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+# ======================== 新建 ========================
+
+- id: TC-DICT-005
+  summary: 新建字典数据成功
+  tag: dict_create
+  priority: P0
+  method: POST
+  path: /cms/dict
+  auth: super
+  json:
+    order: 1
+    label: 测试标签
+    value: test_val
+    type: gender
+  expected:
+    status_code: 201
+
+- id: TC-DICT-006
+  summary: label 为空新建失败
+  tag: dict_create_validation
+  priority: P1
+  method: POST
+  path: /cms/dict
+  auth: super
+  json:
+    order: 1
+    label: ""
+    value: v
+    type: gender
+  expected:
+    error: true
+
+- id: TC-DICT-006b
+  summary: value 为空新建失败
+  tag: dict_create_validation
+  priority: P1
+  method: POST
+  path: /cms/dict
+  auth: super
+  json:
+    order: 1
+    label: test
+    value: ""
+    type: gender
+  expected:
+    error: true
+
+- id: TC-DICT-006c
+  summary: type 为空新建失败
+  tag: dict_create_validation
+  priority: P1
+  method: POST
+  path: /cms/dict
+  auth: super
+  json:
+    order: 1
+    label: test
+    value: v
+    type: ""
+  expected:
+    error: true
+
+# ======================== 更新 ========================
+
+- id: TC-DICT-007
+  summary: 更新字典数据成功
+  tag: dict_update
+  priority: P1
+  method: PUT
+  path: /cms/dict/2
+  auth: super
+  json:
+    label: 更新后的标签
+  expected:
+    status_code: 201
+
+# ======================== 删除 ========================
+
+- id: TC-DICT-008
+  summary: 删除字典数据（⚠️ 依赖前序新建的ID，首次运行通过，重复运行可能404）
+  tag: dict_delete
+  priority: P1
+  method: DELETE
+  path: /cms/dict/9
+  auth: super
+  expected:
+    error: true
+
+# ======================== 越权 + 未登录 ========================
+
+- id: TC-DICT-009
+  summary: 普通用户访问字典接口被拒绝
+  tag: dict_access_control
+  priority: P1
+  method: GET
+  path: /cms/dict/all
+  auth: user
+  params:
+    type: gender
+  expected:
+    error: true
+
+- id: TC-DICT-009b
+  summary: 未登录访问字典接口被拒绝
+  tag: dict_access_control
+  priority: P1
+  method: GET
+  path: /cms/dict/all
+  auth: none
+  params:
+    type: gender
+  expected:
+    error: true

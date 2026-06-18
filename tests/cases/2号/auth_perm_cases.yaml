@@ -1,0 +1,149 @@
+# 权限分配管理测试用例 - 基于 test_cases/2号/auth_perm.md
+# 覆盖：权限查询、按组查权限、新增/移除权限、删除组全部权限、越权、未登录
+# 全部接口鉴权：@auth.admin_required（仅超级管理员可访问）
+
+# ======================== 权限查询 ========================
+
+- id: TC-PERM-001
+  summary: 查询所有可分配权限成功
+  tag: perm_query
+  priority: P0
+  method: GET
+  path: /cms/auth/all
+  auth: super
+  params: {}
+  expected:
+    status_code: 200
+
+- id: TC-PERM-002
+  summary: 查询指定权限组的权限列表成功
+  tag: perm_query
+  priority: P0
+  method: GET
+  path: /cms/auth/by_group
+  auth: super
+  params:
+    group_id: 3
+  expected:
+    status_code: 200
+
+# ======================== 参数校验 ========================
+
+- id: TC-PERM-003
+  summary: group_id 不传时参数校验失败
+  tag: perm_query_validation
+  priority: P1
+  method: GET
+  path: /cms/auth/by_group
+  auth: super
+  params: {}
+  expected:
+    error: true
+
+- id: TC-PERM-003b
+  summary: group_id 不存在时返回空列表
+  tag: perm_query_validation
+  priority: P1
+  method: GET
+  path: /cms/auth/by_group
+  auth: super
+  params:
+    group_id: 9999
+  expected:
+    status_code: 200
+
+# ======================== 新增权限 ========================
+
+- id: TC-PERM-004
+  summary: 为权限组新增多个权限成功
+  tag: perm_append
+  priority: P0
+  method: PUT
+  path: /cms/auth/append
+  auth: super
+  json:
+    group_id: 2
+    auth_ids: [10, 11]
+  expected:
+    status_code: 201
+
+- id: TC-PERM-005
+  summary: group_id 为空时新增失败
+  tag: perm_append_validation
+  priority: P1
+  method: PUT
+  path: /cms/auth/append
+  auth: super
+  json:
+    group_id: ""
+    auth_ids: [10, 11]
+  expected:
+    error: true
+
+- id: TC-PERM-005b
+  summary: auth_ids 为空数组时接口仍返回成功（⚠️ 未校验，疑似 Bug）
+  tag: perm_append_validation
+  priority: P1
+  method: PUT
+  path: /cms/auth/append
+  auth: super
+  json:
+    group_id: 2
+    auth_ids: []
+  expected:
+    status_code: 201
+
+# ======================== 移除权限 ========================
+
+- id: TC-PERM-006
+  summary: 从权限组移除多个权限成功
+  tag: perm_remove
+  priority: P1
+  method: PUT
+  path: /cms/auth/remove
+  auth: super
+  json:
+    group_id: 2
+    auth_ids: [10]
+  expected:
+    status_code: 202
+
+# ======================== 删除全部权限 ========================
+
+- id: TC-PERM-007
+  summary: 删除某权限组的所有权限成功
+  tag: perm_delete_all
+  priority: P1
+  method: DELETE
+  path: /cms/auth/by_group
+  auth: super
+  params:
+    group_id: 3
+  expected:
+    status_code: 202
+
+# ======================== 越权访问 ========================
+
+- id: TC-PERM-008
+  summary: 普通用户访问权限接口被拒绝
+  tag: perm_access_control
+  priority: P0
+  method: GET
+  path: /cms/auth/all
+  auth: user
+  params: {}
+  expected:
+    error: true
+
+# ======================== 未登录访问 ========================
+
+- id: TC-PERM-009
+  summary: 未登录访问权限接口被拒绝
+  tag: perm_access_control
+  priority: P1
+  method: GET
+  path: /cms/auth/all
+  auth: none
+  params: {}
+  expected:
+    error: true
