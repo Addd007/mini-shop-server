@@ -51,6 +51,12 @@ def _has_error(resp_json: dict) -> bool:
     return error_code is not None and error_code != 0
 
 
+
+def _skip_if_marked(case: dict):
+    """如果用例标记了 skip: true，则跳过该用例。"""
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
+
 ALL_CASES = _load_cases()
 NOTICE_QUERY_CASES = _filter_by_tag(ALL_CASES, "notice_query")
 NOTICE_DETAIL_CASES = _filter_by_tag(ALL_CASES, "notice_detail")
@@ -116,12 +122,14 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_QUERY_CASES, ids=[c["id"] for c in NOTICE_QUERY_CASES])
 def test_notice_query(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -131,14 +139,17 @@ def test_notice_query(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_DETAIL_CASES, ids=[c["id"] for c in NOTICE_DETAIL_CASES])
 def test_notice_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -148,12 +159,14 @@ def test_notice_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_CREATE_CASES, ids=[c["id"] for c in NOTICE_CREATE_CASES])
 def test_notice_create(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -163,8 +176,10 @@ def test_notice_create(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_CREATE_VALIDATION_CASES, ids=[c["id"] for c in NOTICE_CREATE_VALIDATION_CASES])
 def test_notice_create_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -174,12 +189,14 @@ def test_notice_create_validation(client: ApiClient, tokens: Dict[str, str], cas
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_UPDATE_CASES, ids=[c["id"] for c in NOTICE_UPDATE_CASES])
 def test_notice_update(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -189,14 +206,17 @@ def test_notice_update(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_DELETE_CASES, ids=[c["id"] for c in NOTICE_DELETE_CASES])
 def test_notice_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -206,5 +226,7 @@ def test_notice_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.notice
 @pytest.mark.parametrize("case", NOTICE_ACCESS_CONTROL_CASES, ids=[c["id"] for c in NOTICE_ACCESS_CONTROL_CASES])
 def test_notice_access_control(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)

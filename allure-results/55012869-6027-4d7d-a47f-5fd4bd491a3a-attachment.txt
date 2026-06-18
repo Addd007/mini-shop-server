@@ -1,1 +1,0 @@
-{"error_code": 10120, "msg": {"size": ["Number must be between 1 and 100."]}, "request_url": "GET /v1/product/list/by_category"}

@@ -56,6 +56,12 @@ def _has_error(resp_json: dict) -> bool:
     return error_code is not None and error_code != 0
 
 
+
+def _skip_if_marked(case: dict):
+    """如果用例标记了 skip: true，则跳过该用例。"""
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
+
 ALL_CASES = _load_cases()
 OPER_SEARCH_CASES = _filter_by_tag(ALL_CASES, "oper_search")
 OPER_SEARCH_VALIDATION_CASES = _filter_by_tag(ALL_CASES, "oper_search_validation")
@@ -124,12 +130,14 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_SEARCH_CASES, ids=[c["id"] for c in OPER_SEARCH_CASES])
 def test_oper_search(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -139,8 +147,10 @@ def test_oper_search(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_SEARCH_VALIDATION_CASES, ids=[c["id"] for c in OPER_SEARCH_VALIDATION_CASES])
 def test_oper_search_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -150,12 +160,14 @@ def test_oper_search_validation(client: ApiClient, tokens: Dict[str, str], case:
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_USER_LIST_CASES, ids=[c["id"] for c in OPER_USER_LIST_CASES])
 def test_oper_user_list(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -165,8 +177,10 @@ def test_oper_user_list(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_USER_LIST_VALIDATION_CASES, ids=[c["id"] for c in OPER_USER_LIST_VALIDATION_CASES])
 def test_oper_user_list_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -176,14 +190,17 @@ def test_oper_user_list_validation(client: ApiClient, tokens: Dict[str, str], ca
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_DETAIL_CASES, ids=[c["id"] for c in OPER_DETAIL_CASES])
 def test_oper_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -193,8 +210,10 @@ def test_oper_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_DETAIL_VALIDATION_CASES, ids=[c["id"] for c in OPER_DETAIL_VALIDATION_CASES])
 def test_oper_detail_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -204,14 +223,17 @@ def test_oper_detail_validation(client: ApiClient, tokens: Dict[str, str], case:
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_DELETE_CASES, ids=[c["id"] for c in OPER_DELETE_CASES])
 def test_oper_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -221,8 +243,10 @@ def test_oper_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_DELETE_VALIDATION_CASES, ids=[c["id"] for c in OPER_DELETE_VALIDATION_CASES])
 def test_oper_delete_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -232,12 +256,14 @@ def test_oper_delete_validation(client: ApiClient, tokens: Dict[str, str], case:
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_CLEAR_CASES, ids=[c["id"] for c in OPER_CLEAR_CASES])
 def test_oper_clear(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -247,5 +273,7 @@ def test_oper_clear(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.oper_log
 @pytest.mark.parametrize("case", OPER_ACCESS_CONTROL_CASES, ids=[c["id"] for c in OPER_ACCESS_CONTROL_CASES])
 def test_oper_access_control(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)

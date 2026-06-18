@@ -1,1 +1,0 @@
-{"data": {"items": [{"category_id": 1, "id": 34, "images": [], "main_image": "http://127.0.0.1:5000/static/images", "name": 1, "price": 1.0, "stock": 111, "summary": null}]}, "error_code": 0, "msg": "\u6210\u529f"}

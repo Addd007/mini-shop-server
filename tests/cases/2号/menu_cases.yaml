@@ -93,7 +93,7 @@
     error: true
 
 - id: TC-MENU-005
-  summary: routes 为空时接口未校验仍返回成功（⚠️ 疑似 Bug）
+  summary: routes 为空时接口应返回校验失败（⚠️ 疑似 Bug）
   tag: menu_override
   priority: P1
   method: PUT
@@ -103,7 +103,9 @@
     group_id: 2
     routes: []
   expected:
-    status_code: 200
+    error: true
+  skip: true
+  skip_reason: "已知Bug BUG-MENU-OVERRIDE-001: routes为空数组未校验，仍返回成功"
 
 - id: TC-MENU-005b
   summary: group_id 为空时覆盖失败

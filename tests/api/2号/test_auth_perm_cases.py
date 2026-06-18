@@ -66,6 +66,12 @@ def _has_error(resp_json: dict) -> bool:
 # 模块级加载用例数据（只读取一次 YAML，按 tag 拆分）
 # ---------------------------------------------------------------------------
 
+
+def _skip_if_marked(case: dict):
+    """如果用例标记了 skip: true，则跳过该用例。"""
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
+
 ALL_CASES = _load_cases()
 PERM_QUERY_CASES = _filter_by_tag(ALL_CASES, "perm_query")
 PERM_QUERY_VALIDATION_CASES = _filter_by_tag(ALL_CASES, "perm_query_validation")
@@ -166,6 +172,7 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
     ids=[c["id"] for c in PERM_QUERY_CASES],
 )
 def test_perm_query(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -188,6 +195,7 @@ def test_perm_query(client: ApiClient, tokens: Dict[str, str], case: dict):
     ids=[c["id"] for c in PERM_QUERY_VALIDATION_CASES],
 )
 def test_perm_query_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -213,6 +221,7 @@ def test_perm_query_validation(client: ApiClient, tokens: Dict[str, str], case: 
     ids=[c["id"] for c in PERM_APPEND_CASES],
 )
 def test_perm_append(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -235,6 +244,7 @@ def test_perm_append(client: ApiClient, tokens: Dict[str, str], case: dict):
     ids=[c["id"] for c in PERM_APPEND_VALIDATION_CASES],
 )
 def test_perm_append_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -255,6 +265,7 @@ def test_perm_append_validation(client: ApiClient, tokens: Dict[str, str], case:
     ids=[c["id"] for c in PERM_REMOVE_CASES],
 )
 def test_perm_remove(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -277,6 +288,7 @@ def test_perm_remove(client: ApiClient, tokens: Dict[str, str], case: dict):
     ids=[c["id"] for c in PERM_DELETE_ALL_CASES],
 )
 def test_perm_delete_all(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 
@@ -299,6 +311,7 @@ def test_perm_delete_all(client: ApiClient, tokens: Dict[str, str], case: dict):
     ids=[c["id"] for c in PERM_ACCESS_CONTROL_CASES],
 )
 def test_perm_access_control(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
 

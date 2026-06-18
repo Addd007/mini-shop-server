@@ -116,7 +116,7 @@
     error: true
 
 - id: TC-OPER-009
-  summary: 非法时间格式未做校验仍返回成功（⚠️ 疑似 Bug）
+  summary: 非法时间格式应返回校验失败（⚠️ 疑似 Bug）
   tag: oper_search
   priority: P1
   method: GET
@@ -128,7 +128,9 @@
     start: "2026-13-40"
     end: abc
   expected:
-    status_code: 200
+    error: true
+  skip: true
+  skip_reason: "已知Bug BUG-OPER-SEARCH-001: 非法时间格式未校验，仍返回成功"
 
 # ======================== 用户列表日志 ========================
 
@@ -142,6 +144,20 @@
   params:
     page: 1
     size: 10
+  expected:
+    status_code: 200
+
+- id: TC-OPER-010b
+  summary: 用户列表日志无数据查询（查询不存在的用户名）
+  tag: oper_user_list
+  priority: P2
+  method: GET
+  path: /cms/log/oper/user/list
+  auth: super
+  params:
+    page: 1
+    size: 10
+    username: no_such_user_xyz
   expected:
     status_code: 200
 
@@ -187,14 +203,14 @@
 # ======================== 删除操作日志（admin_required） ========================
 
 - id: TC-OPER-014
-  summary: 删除单条操作日志（⚠️ 数据可能已被清空，id=9 可能不存在→404）
+  summary: 删除单条操作日志成功
   tag: oper_delete
   priority: P2
   method: DELETE
   path: /cms/log/oper/9
   auth: super
   expected:
-    error: true
+    status_code: 202
 
 - id: TC-OPER-015
   summary: 删除不存在的操作日志失败

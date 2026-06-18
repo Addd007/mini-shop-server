@@ -1,1 +1,0 @@
-{"data": {"token": "eyJ1aWQiOjMxLCJ0eXBlIjoxMDIsInNjb3BlIjoi5rWL6K-VMSJ9.ajAP4A.tIZBHKAcGOnPdvx0wWZkWXDsZqg"}, "error_code": 0, "msg": "\u6210\u529f"}

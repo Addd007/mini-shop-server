@@ -51,6 +51,12 @@ def _has_error(resp_json: dict) -> bool:
     return error_code is not None and error_code != 0
 
 
+
+def _skip_if_marked(case: dict):
+    """如果用例标记了 skip: true，则跳过该用例。"""
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
+
 ALL_CASES = _load_cases()
 ROUTE_TREE_CASES = _filter_by_tag(ALL_CASES, "route_tree")
 ROUTE_NODE_CASES = _filter_by_tag(ALL_CASES, "route_node")
@@ -116,12 +122,14 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_TREE_CASES, ids=[c["id"] for c in ROUTE_TREE_CASES])
 def test_route_tree(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -131,14 +139,17 @@ def test_route_tree(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_NODE_CASES, ids=[c["id"] for c in ROUTE_NODE_CASES])
 def test_route_node(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -148,12 +159,14 @@ def test_route_node(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_CREATE_CASES, ids=[c["id"] for c in ROUTE_CREATE_CASES])
 def test_route_create(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -163,8 +176,10 @@ def test_route_create(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_CREATE_VALIDATION_CASES, ids=[c["id"] for c in ROUTE_CREATE_VALIDATION_CASES])
 def test_route_create_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -174,12 +189,14 @@ def test_route_create_validation(client: ApiClient, tokens: Dict[str, str], case
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_UPDATE_CASES, ids=[c["id"] for c in ROUTE_UPDATE_CASES])
 def test_route_update(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -189,14 +206,17 @@ def test_route_update(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_DELETE_CASES, ids=[c["id"] for c in ROUTE_DELETE_CASES])
 def test_route_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -206,5 +226,7 @@ def test_route_delete(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.route
 @pytest.mark.parametrize("case", ROUTE_ACCESS_CONTROL_CASES, ids=[c["id"] for c in ROUTE_ACCESS_CONTROL_CASES])
 def test_route_access_control(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)

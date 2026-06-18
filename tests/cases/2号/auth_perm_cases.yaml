@@ -81,7 +81,7 @@
     error: true
 
 - id: TC-PERM-005b
-  summary: auth_ids 为空数组时接口仍返回成功（⚠️ 未校验，疑似 Bug）
+  summary: auth_ids 为空数组时接口应返回校验失败（⚠️ 疑似 Bug）
   tag: perm_append_validation
   priority: P1
   method: PUT
@@ -91,7 +91,9 @@
     group_id: 2
     auth_ids: []
   expected:
-    status_code: 201
+    error: true
+  skip: true
+  skip_reason: "已知Bug BUG-PERM-APPEND-001: auth_ids为空数组未校验，仍返回成功"
 
 # ======================== 移除权限 ========================
 

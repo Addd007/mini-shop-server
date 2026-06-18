@@ -46,7 +46,7 @@
   tag: config_query
   priority: P1
   method: GET
-  path: /cms/config/key/page_size
+  path: /cms/config/key/sys.paginator.size
   auth: super
   expected:
     status_code: 200
@@ -125,7 +125,7 @@
     error: true
 
 - id: TC-CONFIG-005d
-  summary: 重复 key 时接口未校验仍返回成功（⚠️ 疑似 Bug）
+  summary: 重复 key 时接口应返回校验失败（⚠️ 疑似 Bug）
   tag: config_create
   priority: P1
   method: POST
@@ -137,7 +137,9 @@
     value: "20"
     type: true
   expected:
-    status_code: 201
+    error: true
+  skip: true
+  skip_reason: "已知Bug BUG-CONFIG-CREATE-001: 重复key未校验，仍返回成功"
 
 # ======================== 更新 ========================
 

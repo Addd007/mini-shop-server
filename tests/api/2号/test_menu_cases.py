@@ -50,6 +50,12 @@ def _has_error(resp_json: dict) -> bool:
     return error_code is not None and error_code != 0
 
 
+
+def _skip_if_marked(case: dict):
+    """如果用例标记了 skip: true，则跳过该用例。"""
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
+
 ALL_CASES = _load_cases()
 MENU_QUERY_CASES = _filter_by_tag(ALL_CASES, "menu_query")
 MENU_QUERY_VALIDATION_CASES = _filter_by_tag(ALL_CASES, "menu_query_validation")
@@ -114,12 +120,14 @@ def _run_case(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.menu
 @pytest.mark.parametrize("case", MENU_QUERY_CASES, ids=[c["id"] for c in MENU_QUERY_CASES])
 def test_menu_query(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -129,14 +137,17 @@ def test_menu_query(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.menu
 @pytest.mark.parametrize("case", MENU_QUERY_VALIDATION_CASES, ids=[c["id"] for c in MENU_QUERY_VALIDATION_CASES])
 def test_menu_query_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if expected.get("error"):
-        _assert_error_response(case, resp, body)
+        with allure.step("校验错误响应"):
+            _assert_error_response(case, resp, body)
     elif "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -146,12 +157,14 @@ def test_menu_query_validation(client: ApiClient, tokens: Dict[str, str], case: 
 @pytest.mark.menu
 @pytest.mark.parametrize("case", MENU_OVERRIDE_CASES, ids=[c["id"] for c in MENU_OVERRIDE_CASES])
 def test_menu_override(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -161,8 +174,10 @@ def test_menu_override(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.menu
 @pytest.mark.parametrize("case", MENU_OVERRIDE_VALIDATION_CASES, ids=[c["id"] for c in MENU_OVERRIDE_VALIDATION_CASES])
 def test_menu_override_validation(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)
 
 
 # ===========================================================================
@@ -172,12 +187,14 @@ def test_menu_override_validation(client: ApiClient, tokens: Dict[str, str], cas
 @pytest.mark.menu
 @pytest.mark.parametrize("case", MENU_CONSISTENCY_CASES, ids=[c["id"] for c in MENU_CONSISTENCY_CASES])
 def test_menu_consistency(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
     expected = case.get("expected", {})
     if "status_code" in expected:
-        assert resp.status_code == expected["status_code"], (
-            f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
-        )
+        with allure.step("校验 HTTP 状态码"):
+            assert resp.status_code == expected["status_code"], (
+                f"[{case['id']}] 期望 {expected['status_code']}, 实际 {resp.status_code}"
+            )
 
 
 # ===========================================================================
@@ -187,5 +204,7 @@ def test_menu_consistency(client: ApiClient, tokens: Dict[str, str], case: dict)
 @pytest.mark.menu
 @pytest.mark.parametrize("case", MENU_ACCESS_CONTROL_CASES, ids=[c["id"] for c in MENU_ACCESS_CONTROL_CASES])
 def test_menu_access_control(client: ApiClient, tokens: Dict[str, str], case: dict):
+    _skip_if_marked(case)
     resp, body = _run_case(client, tokens, case)
-    _assert_error_response(case, resp, body)
+    with allure.step("校验错误响应"):
+        _assert_error_response(case, resp, body)

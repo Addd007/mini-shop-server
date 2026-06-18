@@ -206,9 +206,125 @@ def seed_login_logs() -> None:
         db.session.execute(login_log_table.insert().values(**log))
 
 
+CMS_INSERT_SQL = [
+    # --- group (5 条) ---
+    "INSERT INTO `group` (id, name, info) VALUES (1, '系统管理员', '行使超级管理员的相同权限，但不能新增同级的系统管理员')",
+    "INSERT INTO `group` (id, name, info) VALUES (2, '运维管理员', '管理商品上架、下架')",
+    "INSERT INTO `group` (id, name, info) VALUES (3, '物流管理员', '负责订单的发货情况')",
+    "INSERT INTO `group` (id, name, info) VALUES (4, '活动策划员', '策划线上营销活动')",
+    "INSERT INTO `group` (id, name, info) VALUES (6, '测试1', '测试分组')",
+    # --- route (29 条) ---
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (1, 0, '首页', 'Main', 'fa fa-th-large', '/main', null, 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (3, 1, '主页面', 'Home', 'fa fa-align-justify', '/home', 'home/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (4, 1, '规范指南', 'Guide', 'fa fa-align-justify', '/guide', 'guide/index', 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (5, 0, '关于', 'About', 'fa fa-info', '/about', null, 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (6, 5, '关于', 'AboutIndex', 'fa fa-align-justify', '/about/index', 'about/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (7, 0, '系统管理', 'Admin', 'fa fa-cog', '/admin', null, 0, 4)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (8, 7, '用户管理', 'AdminUser', 'fa fa-align-justify', '/admin/user', 'admin/user/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (9, 7, '权限管理', 'AdminApi', 'fa fa-align-justify', '/admin/auth', 'admin/auth/index', 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (10, 7, '菜单管理', 'AdminMenu', 'fa fa-align-justify', '/admin/menu', 'admin/menu/index', 0, 2)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (11, 0, '文件管理', 'File', 'fa fa-folder-o', '/file', null, 0, 7)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (12, 11, '文件管理', 'FileIndex', 'fa fa-align-justify', '/file/index', 'file/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (13, 0, '系统工具', 'Tool', 'fa fa-wrench', '/tool', null, 0, 5)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (14, 16, 'Json格式化', 'JsonView', 'fa fa-edit', '/component/json-view', 'components/json-view', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (15, 13, '表单构建', 'FormBuilder', 'fa fa-list-ul', '/tool/build', 'tools/build/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (16, 0, '组件管理', 'ComponentLib', 'fa fa-cogs', '/component', '', 0, 6)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (17, 13, '错误码', 'ErrorCode', 'fa fa-file-word-o', '/tool/error-code', 'tools/error-code/index', 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (18, 13, '接口文档', 'Swagger', 'fa fa-book', '/tool/swagger', 'tools/swagger/index', 0, 2)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (19, 0, '文章管理', 'Article', 'fa fa-file-text-o', '/article', null, 0, 8)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (20, 19, '新增文章', 'ArticleAdd', 'fa fa-align-justify', '/article/add', 'article/add', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (21, 19, '文章列表', 'ArticleList', 'fa fa-align-justify', '/article/list', 'article/index', 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (22, 19, '编辑文章', 'ArticleEdit', 'fa fa-align-justify', '/article/edit/\\:id', 'article/edit', 1, 2)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (23, 7, '字典管理', 'AdminDict', 'fa fa-align-justify', '/admin/dict', 'admin/dict/index', 0, 3)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (24, 7, '字典数据', 'AdminDictData', 'fa fa-align-justify', '/admin/dict/data/\\:id', 'admin/dict/dict-data', 1, 4)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (25, 7, '日志管理', 'AdminLog', 'fa fa-pencil-square-o', '/admin/log', null, 0, 7)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (26, 25, '登录日志', 'LoginLog', 'fa fa-sign-in', '/admin/log/login-log', 'admin/log/login-log', 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (27, 25, '操作日志', 'OperLog', 'fa fa-keyboard-o', '/admin/log/oper-log', 'admin/log/oper-log', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (28, 7, '通知管理', 'Notice', 'fa fa-align-justify', '/admin/notice', 'admin/notice/index', 0, 6)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (29, 16, '富文本', 'Tinymce', 'fa fa-edit', '/component/tinymce', 'components/tinymce/index', 0, 1)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (30, 7, '参数管理', 'AdminConfig', 'fa fa-list-ol', '/admin/config', 'admin/config/index', 0, 5)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (31, 0, '类别管理', 'Category', 'fa fa-table', '/category', '', 0, 3)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (32, 31, '类别列表', 'CategoryIndex', 'fa fa-align-justify', '/category/index', 'category/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (33, 0, 'Banner管理', 'Banner', 'fa fa-ellipsis-h', '/banner', null, 0, 2)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (34, 33, 'Banner列表', 'BannerIndex', 'fa fa-ellipsis-h', '/banner/index', 'banner/index', 0, 0)",
+    "INSERT INTO route (id, parent_id, title, name, icon, path, component, hidden, `order`) VALUES (36, 16, 'Ueditor', 'Ueditor', 'fa fa-edit', '/component/Ueditor', 'components/ueditor/index', 0, 0)",
+    # --- auth (3 条) ---
+    "INSERT INTO auth (id, group_id, name, module) VALUES (1, 1, '查询用户列表', '用户')",
+    "INSERT INTO auth (id, group_id, name, module) VALUES (2, 1, '更改用户密码', '用户')",
+    "INSERT INTO auth (id, group_id, name, module) VALUES (3, 1, '新增类别', '类别')",
+    # --- menu (12 条) ---
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 0)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 1)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 3)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 4)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 5)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 6)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 7)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 8)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 9)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 10)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 11)",
+    "INSERT INTO menu (group_id, route_id) VALUES (1, 12)",
+    # --- config (4 条) ---
+    "INSERT INTO config (id, name, `key`, value, type, remark) VALUES (1, '用户管理-账号初始密码', 'sys.user.init_password', '123456', 1, '用户初始化密码: 123456')",
+    "INSERT INTO config (id, name, `key`, value, type, remark) VALUES (2, '页面框架-布局主题', 'sys.layout.theme', 'vertical', 1, '左右布局default，上下布局vertical，T型布局t-type')",
+    "INSERT INTO config (id, name, `key`, value, type, remark) VALUES (3, '分页查询-默认页', 'sys.paginator.page', '1', 1, '默认查询第1页')",
+    "INSERT INTO config (id, name, `key`, value, type, remark) VALUES (4, '分页查询-默认数量', 'sys.paginator.size', '10', 1, '默认每页10条数据')",
+    # --- dict_type (12 条) ---
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (1, '用户性别', 'sys_user_sex', 1, '用户性别列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (2, '菜单状态', 'sys_show_hide', 1, '菜单状态列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (3, '系统开关', 'sys_normal_disable', 1, '系统开关列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (4, '任务状态', 'sys_job_status', 1, '任务状态列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (5, '任务分组', 'sys_job_group', 1, '任务分组列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (6, '系统是否', 'sys_yes_no', 1, '系统是否列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (7, '通知类型', 'sys_notice_type', 1, '通知类型列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (8, '通知状态', 'sys_notice_status', 1, '通知状态列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (9, '操作类型', 'sys_oper_type', 1, '操作类型列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (10, '系统状态', 'sys_common_status', 1, '登录状态列表')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (13, '用户性别1', 'sys_user_sex1', 1, '')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (14, '用户性别1', 'sys_user_sex1', 1, '')",
+    "INSERT INTO dict_type (id, name, type, status, remark) VALUES (16, '测试1', 'test', 0, '')",
+    # --- dict (5 条) ---
+    "INSERT INTO dict (id, `order`, label, value, type, css_class, list_class, is_default, status, remark) VALUES (1, 1, '男', '0', 'sys_user_sex', null, null, 1, 1, '性别: 男')",
+    "INSERT INTO dict (id, `order`, label, value, type, css_class, list_class, is_default, status, remark) VALUES (2, 2, '女', '1', 'sys_user_sex', null, null, 0, 1, '性别: 女')",
+    "INSERT INTO dict (id, `order`, label, value, type, css_class, list_class, is_default, status, remark) VALUES (4, 1, '显示', '0', 'sys_show_hide', null, 'primary', 1, 1, '显示菜单')",
+    "INSERT INTO dict (id, `order`, label, value, type, css_class, list_class, is_default, status, remark) VALUES (5, 2, '隐藏', '1', 'sys_show_hide', null, 'danger', 0, 1, '隐藏菜单')",
+    # --- notice (5 条) ---
+    "INSERT INTO notice (create_time, update_time, delete_time, id, type, title, content, status, remark, create_by, update_by) VALUES (null, 1593311079, null, 1, 2, '温馨提醒：2020-07-01 MiniShop新版本发布啦', '<p>新版本内容</p>', 0, '', '管理员', 'Boss')",
+    "INSERT INTO notice (create_time, update_time, delete_time, id, type, title, content, status, remark, create_by, update_by) VALUES (null, 1593311075, null, 2, 1, '维护通知：2020-07-01 MiniShop系统凌晨0:00维护', '<p>维护内容</p>', 0, '', '管理员', 'Boss')",
+    "INSERT INTO notice (create_time, update_time, delete_time, id, type, title, content, status, remark, create_by, update_by) VALUES (1593309584, 1593310141, 1593310141, 3, 1, '测试', '<p>111</p>', 1, '', 'Boss', '')",
+    "INSERT INTO notice (create_time, update_time, delete_time, id, type, title, content, status, remark, create_by, update_by) VALUES (1593311196, 1593311241, 1593311241, 4, 2, '测试1', '<p>测试1111</p>', 1, '', 'Boss', 'Boss')",
+    "INSERT INTO notice (create_time, update_time, delete_time, id, type, title, content, status, remark, create_by, update_by) VALUES (1593316414, 1593316428, 1593316428, 5, 1, '测试', '<p>111</p>', 1, '', 'Boss', '')",
+    # --- oper_log (11 条) ---
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (1, null, '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', null, null, 2, '更新用户分组', 201, 1592278649)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (2, null, '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', null, null, 2, '更新用户分组', 201, 1592288761)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (3, null, '更改用户密码', 1, 'Boss', '/cms/user/1/password', 'PUT', null, null, 2, '更改用户密码', 201, 1592288770)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (4, null, '更新用户分组', 1, 'Boss', '/cms/user/4/group', 'PUT', null, null, 2, '更新用户分组', 201, 1592879250)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (5, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/4/group', 'PUT', null, null, 2, '更新用户分组', 201, 1592880267)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (6, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', null, null, 2, '更新用户分组', 201, 1592894747)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (7, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', null, 'cms.user+update_user', 2, '更新用户分组', 201, 1592895003)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (8, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', null, 'cms.user+update_user', 2, '更新用户分组', 201, 1592898895)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (9, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', null, 'cms.user+update_user', 2, '更新用户分组', 201, 1592899462)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (10, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', '{\"body\": {\"group_id\": 1}, \"path\": {\"uid\": 1}, \"query\": {}}', 'cms.user+update_user', 2, '更新用户分组', 201, 1592901433)",
+    "INSERT INTO oper_log (id, module, message, user_id, user_name, path, request_method, request_param, endpoint, type, auth, status_code, create_time) VALUES (11, '用户管理', '更新用户分组', 1, 'Boss', '/cms/user/1/group', 'PUT', '{\"body\": {\"group_id\": 1}, \"path\": {\"uid\": 1}, \"query\": {}}', 'cms.user+update_user', 2, '更新用户分组', 201, 1592901757)",
+]
+
+
+def seed_cms() -> None:
+    """Reset CMS configuration data (9 tables, ~80 seed rows)."""
+    db.session.execute(text("SET FOREIGN_KEY_CHECKS=0"))
+    try:
+        for table in ("menu", "auth", "dict", "dict_type", "oper_log", "notice", "config", "route", "group"):
+            db.session.execute(text(f"DELETE FROM `{table}`"))
+        for sql in CMS_INSERT_SQL:
+            db.session.execute(text(sql))
+    finally:
+        db.session.execute(text("SET FOREIGN_KEY_CHECKS=1"))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--scope", choices=("users", "products", "orders", "login_log", "all"), default="all")
+    parser.add_argument("--scope", choices=("users", "products", "orders", "login_log", "cms", "all"), default="all")
     args = parser.parse_args()
 
     app = create_app()
@@ -222,6 +338,8 @@ def main() -> None:
                 seed_orders()
             if args.scope in ("login_log", "all"):
                 seed_login_logs()
+            if args.scope in ("cms", "all"):
+                seed_cms()
 
 
 if __name__ == '__main__':
