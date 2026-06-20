@@ -1,0 +1,13 @@
+- {id: TC-M3-CATALOG-001, summary: 全部分类与数据库一致, method: GET, path: /v1/category/all, tag: category}
+- {id: TC-M3-CATALOG-002, summary: 分类分页字段正确, method: GET, path: /v1/category/list, tag: category, params: {page: 1, size: 3}}
+- {id: TC-M3-CATALOG-003, summary: 分类详情与数据库一致, method: GET, path: /v1/category/2, tag: category}
+- {id: TC-M3-CATALOG-004, summary: 不存在分类返回404, method: GET, path: /v1/category/999999, tag: category_error}
+- {id: TC-M3-CATALOG-005, summary: 分类图片地址完整, method: GET, path: /v1/category/all, tag: category_image}
+- {id: TC-M3-CATALOG-006, summary: 分类商品关联一致, method: GET, path: /v1/product/all/by_category, tag: product_category, params: {category_id: 2}}
+- {id: TC-M3-CATALOG-007, summary: 多主题集合查询正确, method: GET, path: /v1/theme, tag: theme, params: {ids: '1,2'}}
+- {id: TC-M3-CATALOG-008, summary: 非法主题ID集合被拒绝, method: GET, path: /v1/theme, tag: theme_error, params: {ids: '1,a'}}
+- {id: TC-M3-CATALOG-009, summary: 主题详情商品关联一致, method: GET, path: /v1/theme/1, tag: theme_detail}
+- {id: TC-M3-CATALOG-010, summary: 主题分页列表要求登录, method: GET, path: /v1/theme/list, tag: theme_auth, params: {page: 1, size: 10}}
+- {id: TC-M3-CATALOG-011, summary: 轮播图及轮播项完整, method: GET, path: /v1/banner/1, tag: banner}
+- {id: TC-M3-CATALOG-012, summary: 不存在轮播图返回404, method: GET, path: /v1/banner/999999, tag: banner_error}
+

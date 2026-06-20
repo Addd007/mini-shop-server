@@ -1,0 +1,5 @@
+- {id: TC-M3-IDEM-001, summary: 相同下单请求连续提交只生成一笔有效订单, tag: sequential_order, repeats: 2}
+- {id: TC-M3-IDEM-002, summary: 相同下单请求并发提交只生成一笔有效订单, tag: concurrent_order, repeats: 5}
+- {id: TC-M3-IDEM-003, summary: 快速创建不同订单时订单号保持唯一, tag: order_no_unique, repeats: 5}
+- {id: TC-M3-IDEM-004, summary: 失败请求重复执行不产生残留数据, tag: failed_retry, repeats: 3}
+- {id: TC-M3-IDEM-005, summary: 重复支付通知应安全幂等, tag: payment_notify, repeats: 2}

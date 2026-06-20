@@ -1,0 +1,262 @@
+# 成员三：订单业务自动化用例
+# 对应文档：doc/3号/订单业务测试用例.md
+
+- id: TC-M3-ORDER-001
+  summary: 库存充足的单商品下单
+  tag: stock
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 1
+  expected:
+    success: true
+    total_count: 1
+    total_price: 0.01
+    relation_count: 1
+
+- id: TC-M3-ORDER-002
+  summary: 购买数量等于库存
+  tag: stock_boundary_equal
+  priority: P0
+  auth: user
+  product_id: 1
+  count_from_stock: equal
+  expected:
+    success: true
+
+- id: TC-M3-ORDER-003
+  summary: 购买数量比库存多1
+  tag: stock_boundary_over
+  priority: P0
+  auth: user
+  product_id: 1
+  count_from_stock: plus_one
+  expected:
+    success: false
+    order_id: -1
+
+- id: TC-M3-ORDER-004
+  summary: 库存为0的商品下单
+  tag: stock_zero
+  priority: P0
+  auth: user
+  product_id: 3
+  temporary_stock: 0
+  count: 1
+  expected:
+    success: false
+    order_id: -1
+
+- id: TC-M3-ORDER-005
+  summary: 不存在商品下单
+  tag: product_missing
+  priority: P0
+  auth: user
+  products:
+    - product_id: 999999
+      count: 1
+  expected:
+    success: false
+    error: true
+
+- id: TC-M3-ORDER-006
+  summary: 多个商品均有库存
+  tag: multi_product_success
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 2
+    - product_id: 2
+      count: 3
+  expected:
+    success: true
+    total_count: 5
+    total_price: 0.05
+    relation_count: 2
+
+- id: TC-M3-ORDER-007
+  summary: 多商品中一个库存不足
+  tag: multi_product_failure
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 1
+    - product_id: 2
+      count: 985
+  expected:
+    success: false
+    order_id: -1
+
+- id: TC-M3-ORDER-008
+  summary: 同一商品重复出现时应按合计数量校验库存
+  tag: duplicate_product_stock
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 600
+    - product_id: 1
+      count: 600
+  expected:
+    success: false
+    reason: 合计数量1200超过库存998
+    status_codes: [400, 422]
+
+- id: TC-M3-ORDER-009
+  summary: 无收货地址用户下单
+  tag: address_missing
+  priority: P0
+  auth: Allen7D
+  products:
+    - product_id: 1
+      count: 1
+  expected:
+    success: false
+    error: true
+
+- id: TC-M3-ORDER-010
+  summary: 单商品订单金额计算
+  tag: amount_single
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 10
+  expected:
+    success: true
+    total_count: 10
+    total_price: 0.10
+
+- id: TC-M3-ORDER-011
+  summary: 多商品订单金额求和
+  tag: amount_multi
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 10
+    - product_id: 2
+      count: 20
+    - product_id: 3
+      count: 30
+  expected:
+    success: true
+    total_count: 60
+    total_price: 0.60
+
+- id: TC-M3-ORDER-012
+  summary: 客户端伪造金额字段不应影响订单金额
+  tag: amount_tamper
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 10
+      price: 0.0001
+  extra_json:
+    total_price: 0.01
+  expected:
+    success: true
+    total_price: 0.10
+
+- id: TC-M3-ORDER-013
+  summary: 多商品总数量等于各商品数量之和
+  tag: total_count
+  priority: P1
+  auth: user
+  products:
+    - product_id: 1
+      count: 2
+    - product_id: 2
+      count: 3
+    - product_id: 3
+      count: 4
+  expected:
+    success: true
+    total_count: 9
+
+- id: TC-M3-ORDER-014
+  summary: 创建订单时保存完整商品快照
+  tag: snapshot_product
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 2
+  expected:
+    success: true
+    snapshot_fields: [id, name, count, total_price, has_stock]
+
+- id: TC-M3-ORDER-015
+  summary: 下单后修改商品不影响历史订单快照
+  tag: snapshot_product_immutable
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 2
+  expected:
+    success: true
+    immutable: true
+
+- id: TC-M3-ORDER-016
+  summary: 下单后修改地址不影响历史订单快照
+  tag: snapshot_address_immutable
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 1
+  expected:
+    success: true
+    immutable: true
+
+- id: TC-M3-ORDER-017
+  summary: 订单与商品关联记录正确
+  tag: relation_consistency
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 2
+    - product_id: 2
+      count: 3
+  expected:
+    success: true
+    relations:
+      1: 2
+      2: 3
+
+- id: TC-M3-ORDER-018
+  summary: 下单失败不产生订单或关联残留
+  tag: transaction_rollback
+  priority: P0
+  auth: user
+  products:
+    - product_id: 1
+      count: 999
+  expected:
+    success: false
+    no_residue: true
+
+- id: TC-M3-ORDER-019
+  summary: 用户订单列表只包含本人订单
+  tag: list_isolation
+  priority: P1
+  auth: user
+  expected:
+    success: true
+    user_id: 31
+
+- id: TC-M3-ORDER-020
+  summary: 用户不能查看他人订单详情
+  tag: detail_ownership
+  priority: P0
+  auth: user
+  other_user_order_id: 28
+  expected:
+    success: false
+    status_codes: [403, 404]

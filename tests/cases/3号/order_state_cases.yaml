@@ -1,0 +1,8 @@
+- {id: TC-M3-STATE-001, summary: 待支付订单不能发货, tag: invalid_transition, order_id: 1, initial_status: 1, expected_status: 403}
+- {id: TC-M3-STATE-002, summary: 已支付订单可以发货, tag: valid_transition, order_id: 1, initial_status: 2, expected_order_status: 3}
+- {id: TC-M3-STATE-003, summary: 已发货订单不能重复发货, tag: invalid_transition, order_id: 1, initial_status: 3, expected_status: 403}
+- {id: TC-M3-STATE-004, summary: 不存在订单不能发货, tag: missing_order, order_id: 999999, expected_status: 404}
+- {id: TC-M3-STATE-005, summary: 非法订单ID被参数校验拒绝, tag: invalid_id, order_id: 0, expected_status: 400}
+- {id: TC-M3-STATE-006, summary: 非法流转后原状态不变, tag: state_rollback, order_id: 1, initial_status: 1}
+- {id: TC-M3-STATE-007, summary: 前后台订单状态数据一致, tag: state_consistency, order_id: 1, order_no: B0X435186095427189, initial_status: 1}
+
