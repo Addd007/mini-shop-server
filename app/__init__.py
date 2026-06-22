@@ -82,7 +82,11 @@ def apply_json_encoder(app):
 def apply_cors(app):
     from flask_cors import CORS
     cors = CORS()
-    cors.init_app(app, resources={"/*": {"origins": "*"}})
+    cors.init_app(app, resources={"/*": {
+        "origins": "*",
+        "methods": ["GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        "supports_credentials": False,
+    }})
 
 
 def connect_db(app):
