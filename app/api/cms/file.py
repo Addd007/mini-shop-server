@@ -37,7 +37,7 @@ def get_file_types():
 @api.route('/<id>', methods=['POST'])
 @api.route_meta(auth='上传文件', module='文件')
 @api.doc(args=['g.path.parent_id'], auth=True)
-# @auth.group_required
+@auth.group_required
 def upload_file(id):
     '''上传文件'''
     files = request.files
@@ -101,7 +101,7 @@ def create_folder():
 @api.route('/move', methods=['PUT'])
 @api.route_meta(auth='移动文件', module='文件')
 @api.doc(args=['g.query.parent_id', 'g.query.file_ids'], auth=True)
-# @auth.group_required
+@auth.group_required
 def move_files():
     '''批量移动文件'''
     validator = MoveOrCopyFileValidator().nt_data
