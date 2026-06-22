@@ -23,7 +23,7 @@ from app.core.utils import paginate
 from app.service.order import OrderService
 from app.models.order import Order
 from app.dao.order import OrderDao
-from app.libs.error_code import Success, ParameterException
+from app.libs.error_code import Success, ParameterException, OrderException
 from app.validators.forms import OrderPlaceValidator, OrderIDValidator
 
 __author__ = 'Allen7D'
@@ -68,4 +68,6 @@ def get_order(id):
     '''查询订单详情'''
     id = _parse_positive_id(id)
     order = Order.query.get_or_404(id).hide('prepay_id')
+    if order.user_id != g.user.id:
+        raise OrderException(code=403, error_code=8001, msg='无权访问该订单')
     return Success(order)

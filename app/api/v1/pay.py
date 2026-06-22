@@ -23,8 +23,7 @@ def get_pre_order():
     '''查询预订单'''
     order_id = IDMustBePositiveIntValidator().nt_data.id
     pay_service = PayService(order_id)
-    pay_service.pay()
-    Success()
+    return Success(pay_service.pay())
 
 
 @api.route('/notify', methods=['POST'])
@@ -35,7 +34,7 @@ def receive_notify():
     文档: https://pay.weixin.qq.com/wiki/doc/api/native.php?chapter=9_7&index=8
     微信总共会发起10次通知，通知频率为15s/15s/30s/3m/10m/20m/30m/30m/30m/60m/3h/3h/3h/6h/6h - 总计 24h4m）
     '''
-    Success()
+    return Success()
 
 
 @api.route('/re_notify', methods=['POST'])
@@ -43,7 +42,7 @@ def receive_notify():
 @auth.login_required
 def redirect_notify():
     ''''''
-    Success()
+    return Success()
 
 
 @api.route('/concurrency', methods=['POST'])
@@ -51,4 +50,4 @@ def redirect_notify():
 @auth.login_required
 def notify_concurrency():
     ''''''
-    Success()
+    return Success()

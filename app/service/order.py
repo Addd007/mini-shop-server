@@ -3,6 +3,8 @@
   Created by Allen7D on 2018/7/5.
 """
 import json
+import threading
+from collections import defaultdict
 from datetime import datetime
 from random import randint
 from time import time
@@ -23,24 +25,53 @@ class OrderService():
     o_products = None  # order products (订单商品)缩写
     s_products = None  # stock products (库存商品)缩写
     uid = None
+    _locks = defaultdict(threading.Lock)
 
     def palce(self, uid, o_products):
         '''下单方法'''
-        self.o_products = o_products
-        self.s_products = self.__get_products_by_order(o_products)
+        self.o_products = self.__normalize_products(o_products)
+        self.s_products = self.__get_products_by_order(self.o_products)
         self.uid = uid
-        # 校验库存
-        status = self.__get_order_status()
-        # 库存未通过
-        if not status['pass']:
-            status['order_id'] = -1  # 新增order_id属性
-            return status
-        # 库存量通过，开始创建订单
-        order_snap = self.__snap_order(status)
-        order = self.__create_order(order_snap)
-        order['pass'] = True
+        lock = OrderService._locks[uid]
+        with lock:
+            # 幂等：相同用户、相同商品组合在短时间内复用最近订单
+            duplicated = self.__find_existing_order()
+            if duplicated:
+                return duplicated
+            # 校验库存
+            status = self.__get_order_status()
+            # 库存未通过
+            if not status['pass']:
+                status['order_id'] = -1  # 新增order_id属性
+                return status
+            # 库存量通过，开始创建订单
+            order_snap = self.__snap_order(status)
+            try:
+                order = self.__create_order(order_snap)
+            except IntegrityError:
+                duplicated = self.__find_existing_order(snap=order_snap)
+                if duplicated:
+                    return duplicated
+                raise
+            order['pass'] = True
 
-        return order
+            return order
+
+    def __normalize_products(self, o_products):
+        '''统一订单商品结构为字典列表'''
+        normalized = []
+        for product in o_products:
+            if isinstance(product, dict):
+                normalized.append({'product_id': int(product['product_id']), 'count': int(product['count'])})
+            else:
+                normalized.append({'product_id': int(product.product_id), 'count': int(product.count)})
+        seen = set()
+        for item in normalized:
+            key = item['product_id']
+            if key in seen:
+                raise OrderException(msg='商品重复，创建订单失败')
+            seen.add(key)
+        return normalized
 
     def __create_order(self, snap):
         '''将订单写入到数据库'''
@@ -57,14 +88,9 @@ class OrderService():
             order.snap_items = json.dumps(snap['p_status'], ensure_ascii=False)
             db.session.add(order)
 
-            db.session.flush()  # 刷新数据库缓存，不操作事务
-            order_id = order.id  # 获取更新后的order信息
-            for p in self.o_products:
-                # 起初每个p的格式 {'product_id': x, 'count': y}
-                p['order_id'] = order_id
-            db.session.add_all(
-                [Order2Product(p['order_id'], p['product_id'], p['count']) for p in self.o_products]
-            )
+            db.session.flush()
+            order_id = order.id
+            db.session.add_all([Order2Product(order_id, p['product_id'], p['count']) for p in self.o_products])
 
         return {
             'order_no': order_no,
@@ -76,7 +102,7 @@ class OrderService():
         '''生成订单快照(不可更改)'''
         snap = {
             'order_price': 0,  # 订单总价
-            'totalCount': 0,  # 订单中商品总数
+            'total_count': 0,  # 订单中商品总数
             'p_status': [],  # 所有商品的状态
             'snap_address': '',  # 用户收获地址
             'snap_name': '',  # 订单缩略的名字(首个商品)
@@ -86,7 +112,7 @@ class OrderService():
         snap['total_count'] = status['total_count']
         snap['p_status'] = status['p_status_array']
         snap['snap_address'] = json.dumps(self.__get_address(), ensure_ascii=False)  # 建议:放在非关系型数据库(MongoDB)
-        snap['snap_name'] = self.s_products[0]['name'] + (' 等' if len(self.s_products) > 1 else '')
+        snap['snap_name'] = self.s_products[0].name + (' 等' if len(self.s_products) > 1 else '')
         snap['snap_img'] = self.s_products[0].main_image
 
         return snap
@@ -124,8 +150,10 @@ class OrderService():
         # 查询每个 o_product 对应的库存量的状态(p_status)
         # 将结果依次统计合并，写入 status 中
         for o_product in self.o_products:
-            p_status = self.__get_product_status(o_pid=o_product['product_id'],
-                                                 o_count=o_product['count'],
+            o_pid = o_product['product_id'] if isinstance(o_product, dict) else o_product.product_id
+            o_count = o_product['count'] if isinstance(o_product, dict) else o_product.count
+            p_status = self.__get_product_status(o_pid=o_pid,
+                                                 o_count=o_count,
                                                  s_products=self.s_products)
             if not p_status['has_stock']:
                 status['pass'] = False
@@ -184,6 +212,34 @@ class OrderService():
         products = Product.query.filter(Product.id.in_(o_pids)).all()
         return products
 
+    def __find_existing_order(self, snap=None):
+        '''
+        查找当前用户最近的同构订单，用于重复提交时复用结果。
+        仅在同一用户、相同商品组合、相同数量时命中。
+        '''
+        if not self.o_products:
+            return None
+        from app.models.order import Order
+        from app.models.m2m import Order2Product
+
+        expected = sorted([(item['product_id'], item['count']) for item in self.o_products])
+        candidate_ids = [x.id for x in Order.query.filter_by(user_id=self.uid).order_by(Order.id.desc()).limit(30).all()
+                         if x.order_status == OrderStatusEnum.UNPAID.value]
+        if not candidate_ids:
+            return None
+        for order_id in candidate_ids:
+            rels = Order2Product.query.filter_by(order_id=order_id).all()
+            existing = sorted([(x.product_id, x.count) for x in rels])
+            if expected == existing:
+                order = Order.query.get(order_id)
+                return {
+                    'order_no': order.order_no,
+                    'order_id': order.id,
+                    'create_time': order.create_time,
+                    'pass': True,
+                }
+        return None
+
     @staticmethod
     def delivery(order_id, jump_page=''):
         ''' 将订单状态从「已支付」转为「已发货」
@@ -191,7 +247,7 @@ class OrderService():
         '''
         order = Order.query.filter_by(id=order_id).first_or_404()
         # 判断是否已付款
-        if order.order_status != OrderStatusEnum.PAID:
+        if order.order_status != OrderStatusEnum.PAID.value:
             raise OrderException(code=403, error_code=8002, msg='订单未支付，或已经更新过订单了')
         with db.auto_commit():
             order.order_status = OrderStatusEnum.DELIVERED

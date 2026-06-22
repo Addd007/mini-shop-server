@@ -57,6 +57,8 @@ class PayService():
         # 1. 验证订单号是否存在
         order = Order.query.filter_by(id=self.order_id) \
             .first_or_404(e=OrderException(msg='订单不存在', error_code=50010))
+        if order.user_id != g.user.id:
+            raise TokenException(msg='订单与用户不匹配', error_code=1003)
         # 2. 如果订单号存在的，验证订单号与当前用户是否匹配
         if not TokenDao.is_valid_operate(order.user_id):
             raise TokenException(msg='订单与用户不匹配', error_code=1003)
