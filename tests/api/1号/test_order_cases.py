@@ -54,6 +54,10 @@ def _has_error(resp_json: dict) -> bool:
     error_code = resp_json.get("error_code", resp_json.get("code"))
     return error_code is not None and error_code != 0
 
+def _skip_if_marked(case: dict) -> None:
+    """如果用例被标记跳过则直接跳过。"""
+    if case.get("skip"):
+        pytest.skip(case.get("skip_reason", "用例已标记跳过"))
 
 @pytest.fixture(scope="module", autouse=True)
 def initialize_test_data():
@@ -129,6 +133,7 @@ def _assert_error_response(case: dict, resp, body: dict):
 @pytest.mark.parametrize("case", ORDER_PLACE_CASES, ids=[c["id"] for c in ORDER_PLACE_CASES])
 def test_order_place(client: ApiClient, tokens: Dict[str, str], case: dict):
     """订单提交：验证下单、库存校验与订单快照生成。"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -144,6 +149,7 @@ def test_order_place(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.parametrize("case", ORDER_LIST_CASES, ids=[c["id"] for c in ORDER_LIST_CASES])
 def test_order_list(client: ApiClient, tokens: Dict[str, str], case: dict):
     """订单列表：验证用户订单查询与后台检索能力。"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
@@ -159,6 +165,7 @@ def test_order_list(client: ApiClient, tokens: Dict[str, str], case: dict):
 @pytest.mark.parametrize("case", ORDER_DETAIL_CASES, ids=[c["id"] for c in ORDER_DETAIL_CASES])
 def test_order_detail(client: ApiClient, tokens: Dict[str, str], case: dict):
     """订单详情：验证单笔订单明细与快照信息展示。"""
+    _skip_if_marked(case)
     resp = _execute_case(client, tokens, case)
     expected = case.get("expected", {})
     body = resp.json()
