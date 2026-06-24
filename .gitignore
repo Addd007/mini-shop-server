@@ -21,3 +21,4 @@ Pipfile.lock.back
 # Allure 测试报告（运行时生成）
 allure-results/
 allure-report/
+reports/
