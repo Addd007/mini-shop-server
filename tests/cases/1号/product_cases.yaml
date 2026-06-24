@@ -149,16 +149,31 @@
   summary: 新增商品成功
   tag: product_create
   priority: P0
-  skip: true
-  skip_reason: 商品新增暂未实现，先跳过，待后端修复后恢复
   method: POST
   path: /v1/product
   auth: super
   json:
     name: 新商品
     category_id: 1
+    main_img_url: http://example.com/product.jpg
+    price: 99.9
+    stock: 10
+    summary: 商品简介
   expected:
     status_code: 201
+
+- id: TC-PROD-012A
+  summary: 新增商品缺少必填字段失败
+  tag: product_create
+  priority: P0
+  method: POST
+  path: /v1/product
+  auth: super
+  json:
+    name: 缺少字段商品
+    category_id: 1
+  expected:
+    status_code: 400
 
 # ======================== 商品更新 ========================
 
@@ -166,8 +181,6 @@
   summary: 更新商品信息成功
   tag: product_update
   priority: P1
-  skip: true
-  skip_reason: 商品更新暂未实现，先跳过，待后端修复后恢复
   method: PUT
   path: /v1/product/2
   auth: super
@@ -180,8 +193,6 @@
   summary: 非法商品ID更新失败
   tag: product_update
   priority: P1
-  skip: true
-  skip_reason: 商品更新暂未实现，先跳过，待后端修复后恢复
   method: PUT
   path: /v1/product/0
   auth: super

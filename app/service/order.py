@@ -8,6 +8,9 @@ from collections import defaultdict
 from datetime import datetime
 from random import randint
 from time import time
+from uuid import uuid4
+
+from sqlalchemy.exc import IntegrityError
 
 from app.libs.enums import OrderStatusEnum
 from app.libs.error_code import OrderException, UserException
@@ -49,6 +52,7 @@ class OrderService():
             try:
                 order = self.__create_order(order_snap)
             except IntegrityError:
+                db.session.rollback()
                 duplicated = self.__find_existing_order(snap=order_snap)
                 if duplicated:
                     return duplicated
@@ -259,13 +263,11 @@ class OrderService():
     @staticmethod
     def make_order_no():
         '''
-        生成唯一的随机且递增的订单标号
+        生成唯一的订单标号
         :return: 订单标号
         '''
         now = datetime.now()
-        timestamp = time()
         y_code = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
         order_sn = y_code[now.year - 2018] + hex(now.month).upper() + str(now.day) \
-                   + str('%.6f' % timestamp)[-6:] + str(timestamp)[2: 7] \
-                   + str(randint(0, 99)).rjust(2, '0')
+                   + now.strftime('%H%M%S') + uuid4().hex[:8].upper()
         return order_sn

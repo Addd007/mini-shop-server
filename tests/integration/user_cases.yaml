@@ -1,0 +1,56 @@
+- id: USER-SC-001
+  summary: 查询当前用户资料
+  method: GET
+  path: /v1/user
+  auth: super
+  expected:
+    status_code: 200
+    has_fields:
+      - nickname
+      - auth
+
+- id: USER-SC-002
+  summary: 更新当前用户资料后仍可查询
+  method: PUT
+  path: /v1/user
+  auth: super
+  json:
+    username: super
+    nickname: 集成测试超级管理员
+    mobile: "19900000001"
+    email: "999@qq.com"
+  expected:
+    status_code: 200
+
+- id: USER-SC-003
+  summary: 修改密码后可用新密码重新登录
+  method: PUT
+  path: /v1/user/password
+  auth: super
+  json:
+    old_password: "123456"
+    new_password: "1234567"
+    confirm_password: "1234567"
+  expected:
+    status_code: 201
+
+- id: USER-SC-004
+  summary: 绑定手机号
+  method: PUT
+  path: /v1/user/bind
+  auth: super
+  json:
+    account: "18888888888"
+    type: 102
+  expected:
+    status_code: 201
+
+- id: USER-SC-005
+  summary: 解绑手机号
+  method: PUT
+  path: /v1/user/unbind
+  auth: super
+  json:
+    type: 102
+  expected:
+    status_code: 201

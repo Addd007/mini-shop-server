@@ -15,7 +15,7 @@ from app.libs.enums import ScopeEnum
 from app.models.category import Category
 from app.models.identity import Identity
 from app.models.image import Image
-from app.models.m2m import Product2Image
+from app.models.m2m import Order2Product, Product2Image
 from app.models.order import Order
 from app.models.product import Product
 from app.models.login_log import LoginLog
@@ -181,11 +181,33 @@ def seed_products() -> None:
         db.session.execute(property_table.insert().values(id=pid, name=name, detail=detail, product_id=product_id))
 
 
+ORDER_PRODUCT_SEEDS = [
+    (1, 1, 10), (1, 2, 10),
+    (2, 1, 10), (2, 2, 10),
+    (18, 1, 10), (18, 2, 10),
+    (19, 1, 10), (19, 2, 10),
+    (22, 1, 10), (22, 2, 10),
+    (23, 1, 10), (23, 2, 10),
+    (24, 1, 10), (24, 2, 10),
+    (25, 1, 10), (25, 2, 10),
+    (26, 1, 10), (26, 11, 10),
+    (27, 3, 10), (27, 4, 10),
+    (28, 1, 10),
+]
+
+
 def seed_orders() -> None:
-    _truncate_tables(["order"])
+    _truncate_tables(["order_product", "order"])
     order_table = Order.__table__
+    order_product_table = Order2Product.__table__
     for row in ORDER_SEEDS:
         db.session.execute(order_table.insert().values(**row))
+    for order_id, product_id, count in ORDER_PRODUCT_SEEDS:
+        db.session.execute(order_product_table.insert().values(
+            order_id=order_id,
+            product_id=product_id,
+            count=count,
+        ))
 
 
 def seed_login_logs() -> None:

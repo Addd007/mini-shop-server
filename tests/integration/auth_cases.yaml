@@ -1,0 +1,47 @@
+- id: AUTH-SC-001
+  summary: 超级管理员登录成功
+  method: POST
+  path: /v1/token
+  json:
+    account: super
+    secret: "123456"
+    type: 100
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: AUTH-SC-002
+  summary: 普通用户登录成功
+  method: POST
+  path: /v1/token
+  json:
+    account: user
+    secret: "123456"
+    type: 100
+  expected:
+    status_code: 200
+    has_token: true
+
+- id: AUTH-SC-003
+  summary: 密码错误时登录失败
+  method: POST
+  path: /v1/token
+  json:
+    account: user
+    secret: wrongpassword
+    type: 100
+  expected:
+    status_code: 401
+    has_token: false
+    error: true
+
+- id: AUTH-SC-004
+  summary: 有效 token 可以通过校验
+  method: POST
+  path: /v1/token/verify
+  json:
+    token: "{valid_token}"
+  expected:
+    status_code: 200
+    json:
+      error_code: 0

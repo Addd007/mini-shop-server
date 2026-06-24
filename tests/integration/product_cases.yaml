@@ -1,0 +1,49 @@
+- id: PROD-SC-001
+  summary: 创建商品成功
+  method: POST
+  path: /v1/product
+  auth: super
+  json:
+    name: 集成测试商品
+    category_id: 1
+    main_img_url: http://example.com/product.jpg
+    price: 99.9
+    stock: 10
+    summary: 用于集成测试的商品
+  expected:
+    status_code: 201
+    has_fields:
+      - id
+
+- id: PROD-SC-002
+  summary: 查询最近商品
+  method: GET
+  path: /v1/product/recent
+  auth: none
+  params:
+    count: 5
+  expected:
+    status_code: 200
+
+- id: PROD-SC-003
+  summary: 按分类查询商品列表
+  method: GET
+  path: /v1/product/list/by_category
+  auth: user
+  params:
+    category_id: 1
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: PROD-SC-004
+  summary: 创建商品缺少必填字段失败
+  method: POST
+  path: /v1/product
+  auth: super
+  json:
+    name: 缺少字段商品
+    category_id: 1
+  expected:
+    status_code: 400

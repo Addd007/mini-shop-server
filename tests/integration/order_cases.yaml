@@ -1,0 +1,36 @@
+- id: ORDER-SC-001
+  summary: 创建测试商品后提交订单成功
+  method: POST
+  path: /v1/order
+  json:
+    products:
+      - product_id: "{product_id}"
+        count: 1
+  expected:
+    status_code: 200
+
+- id: ORDER-SC-002
+  summary: 查询订单列表
+  method: GET
+  path: /v1/order
+  params:
+    page: 1
+    size: 10
+  expected:
+    status_code: 200
+
+- id: ORDER-SC-003
+  summary: 查询订单详情
+  method: GET
+  path: /v1/order/1
+  expected:
+    status_code: 200
+
+- id: ORDER-SC-004
+  summary: 空商品列表提交订单失败
+  method: POST
+  path: /v1/order
+  json:
+    products: []
+  expected:
+    status_code: 400

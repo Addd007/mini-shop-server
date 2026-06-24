@@ -48,7 +48,14 @@ def place_order():
     '''提交订单'''
     products = OrderPlaceValidator().validate_for_api().products.data
     status = OrderService().palce(uid=g.user.id, o_products=products)
-    return Success(status)
+    return Success(
+        {
+            'order_id': status.get('order_id'),
+            'order_no': status.get('order_no'),
+            'create_time': status.get('create_time'),
+        },
+        error_code=1,
+    )
 
 
 @api.route('', methods=['GET'])
