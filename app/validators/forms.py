@@ -7,7 +7,7 @@
 from datetime import datetime
 
 from flask import request
-from wtforms import BooleanField, StringField, IntegerField, PasswordField, FileField, FieldList
+from wtforms import BooleanField, StringField, IntegerField, FloatField, PasswordField, FileField, FieldList
 from wtforms.validators import DataRequired, ValidationError, length, Email, Regexp, EqualTo, Optional, \
     NumberRange
 
@@ -301,6 +301,46 @@ class ReorderValidator(BaseValidator):
         if not self.isPositiveInteger(id):
             raise ValidationError(message='ID 必须为正整数')
         self.dest_order.data = int(id)
+
+
+class CreateProductValidator(BaseValidator):
+    name = StringField('商品名称', validators=[DataRequired()])
+    price = FloatField('价格', validators=[DataRequired()])
+    stock = IntegerField('库存量', validators=[DataRequired()])
+    summary = StringField('摘要', validators=[DataRequired()])
+    category_id = IntegerField('所属类别组id', validators=[DataRequired()])
+    main_img_url = StringField('主图url', validators=[DataRequired()])
+
+    def validate_category_id(self, value):
+        id = value.data
+        if not self.isPositiveInteger(id):
+            raise ValidationError(message='ID 必须为正整数')
+        self.category_id.data = int(id)
+
+    def validate_stock(self, value):
+        stock = value.data
+        if not self.isNaturalNumber(stock):
+            raise ValidationError(message='stock 必须是自然数')
+        self.stock.data = int(stock)
+
+
+class UpdateProductValidator(CreateProductValidator):
+    name = StringField('商品名称')
+    price = FloatField('价格')
+    stock = IntegerField('库存量')
+    summary = StringField('摘要')
+    category_id = IntegerField('所属类别组id')
+    main_img_url = StringField('主图url')
+
+    def validate_category_id(self, value):
+        if value.data is None:
+            return
+        super().validate_category_id(value)
+
+    def validate_stock(self, value):
+        if value.data is None:
+            return
+        super().validate_stock(value)
 
 
 ########## 订单相关 ##########

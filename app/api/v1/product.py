@@ -10,7 +10,7 @@ from app.models.product import Product
 from app.dao.product import ProductDao
 from app.libs.error_code import Success, ParameterException
 from app.core.utils import paginate
-from app.validators.forms import CountValidator, CategoryIDValidator, ReorderValidator
+from app.validators.forms import CountValidator, CategoryIDValidator, ReorderValidator, CreateProductValidator, UpdateProductValidator
 
 __author__ = 'Allen7D'
 
@@ -69,22 +69,26 @@ def get_product(id):
 
 @api.route('', methods=['POST'])
 @api.route_meta(auth='新增商品', module='商品')
-@api.doc(auth=True)
+@api.doc(args=['g.body.name', 'g.body.price', 'g.body.stock', 'g.body.summary', 'g.body.category_id', 'g.body.main_img_url'], auth=True)
 @auth.group_required
 def create_product():
     '''新增商品'''
-    product = ProductDao.create_product()
-    return Success(product, error_code=1)
+    form = CreateProductValidator().dt_data
+    ProductDao.create_product(**form)
+    return Success(error_code=1)
 
 
 @api.route('/<id>', methods=['PUT'])
 @api.route_meta(auth='更新商品', module='商品')
-@api.doc(args=['g.path.product_id'], auth=True)
+@api.doc(args=['g.path.product_id', 'g.body.name', 'g.body.price', 'g.body.stock', 'g.body.summary', 'g.body.category_id', 'g.body.main_img_url'], auth=True)
 @auth.group_required
 def update_product(id):
     '''更新商品'''
     id = _parse_positive_id(id)
-    product = ProductDao.update_product(id)
+    form = UpdateProductValidator().dt_data
+    if not form:
+        raise ParameterException(msg='请至少提供一个商品更新字段')
+    product = ProductDao.update_product(id, **form)
     return Success(product, error_code=1)
 
 

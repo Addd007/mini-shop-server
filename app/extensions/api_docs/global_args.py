@@ -52,6 +52,20 @@ src_order_in_body = BodyField(
 dest_order_in_body = BodyField(
     name='dest_order', type='integer', description="新顺序", enum=[1, 2, 3, 4, 5, 10, 15, 20])
 
+# 商品创建/更新
+name_in_body = BodyField(
+    name='name', type='string', description='商品名称', enum=['iPhone 15', 'MacBook Pro'])
+price_in_body = BodyField(
+    name='price', type='number', description='价格(单位:分)', enum=[1999, 2999, 3999])
+stock_in_body = BodyField(
+    name='stock', type='integer', description='库存量', enum=[1, 10, 100])
+summary_in_body = BodyField(
+    name='summary', type='string', description='摘要', enum=['商品摘要'])
+category_id_in_body = BodyField(
+    name='category_id', type='integer', description='所属类别组id', enum=[1, 2, 3, 4, 5, 10, 15, 20, 100])
+main_img_url_in_body = BodyField(
+    name='main_img_url', type='string', description='主图url', enum=['http://abc.com/a.jpg'])
+
 category_id_in_path = IntegerPathFiled(
     name='id', description="类别 ID", enum=[1, 2, 3, 4, 5, 10, 15, 20, 100], required=True)
 category_id_in_query = IntegerQueryFiled(

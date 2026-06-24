@@ -15,14 +15,21 @@ __author__ = 'Allen7D'
 
 class ProductDao():
     @staticmethod
+    def _normalize_form(form):
+        form = dict(form)
+        if 'main_img_url' in form:
+            form['_main_img_url'] = form.pop('main_img_url')
+        return form
+
+    @staticmethod
     def create_product(**form):
-        product = Product.create(**form)
+        product = Product.create(**ProductDao._normalize_form(form))
         return product
 
     @staticmethod
     def update_product(id, **form):
         product = Product.get_or_404(id=id)
-        product.set_attrs(**form)
+        product.set_attrs(**ProductDao._normalize_form(form))
         product.update()
         return product
 
