@@ -7,8 +7,16 @@ from datetime import datetime
 from time import localtime, strftime
 
 from flask import current_app, json, request
-from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy, Pagination as _Pagination, BaseQuery
+from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
 from sqlalchemy import Column, Integer, orm, inspect
+
+try:
+    # flask-sqlalchemy 2.x
+    from flask_sqlalchemy import Pagination as _Pagination, BaseQuery
+except ImportError:
+    # flask-sqlalchemy 3.x
+    from flask_sqlalchemy.pagination import Pagination as _Pagination
+    from sqlalchemy.orm import Query as BaseQuery
 
 from app.libs.error_code import NotFound, RepeatException
 from app.libs.enums import UrlFromEnum
@@ -33,6 +41,16 @@ class SQLAlchemy(_SQLAlchemy):
 
 
 class Pagination(_Pagination):
+    # 兼容 flask-sqlalchemy 2.x (query, page, per_page, total, items)
+    #         和 flask-sqlalchemy 3.x (page, per_page, total, items)
+    def __init__(self, *args, **kwargs):
+        if len(args) == 5:
+            # 2.x: (query, page, per_page, total, items) — 跳过 query
+            super().__init__(*args[1:], **kwargs)
+        else:
+            # 3.x: (page, per_page, total, items)
+            super().__init__(*args, **kwargs)
+
     def hide(self, *keys):
         '''每一条数据都隐藏keys中的字段'''
         for item in self.items:
