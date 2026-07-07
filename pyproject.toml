@@ -71,6 +71,7 @@ dev-dependencies = [
     "allure-pytest==2.13.5",
     "flasgger==0.9.5",
     "flask-admin==1.6.1",
+    "pytest-cov>=5.0.0",
 ]
 
 [tool.pytest.ini_options]
